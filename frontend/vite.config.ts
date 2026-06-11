@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/analyze': 'http://localhost:8000',
+      '/compare': 'http://localhost:8000',
       '/history': 'http://localhost:8000',
       '/replay': 'http://localhost:8000',
     },

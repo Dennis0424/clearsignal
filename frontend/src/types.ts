@@ -24,3 +24,11 @@ export interface TradeLogEntry {
   shock_detected: number
   scores_json: string
 }
+
+export interface CompareResponse {
+  ticker: string
+  clearsignal_verdict: string
+  clearsignal_confluence: number
+  clearsignal_explanation: string | null
+  llm_raw_answer: string | null
+}

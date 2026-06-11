@@ -44,3 +44,11 @@ class TradeLogEntry(BaseModel):
     confluence_count: int
     total_modules: int
     shock_detected: bool
+
+
+class CompareResponse(BaseModel):
+    ticker: str
+    clearsignal_verdict: str
+    clearsignal_confluence: int
+    clearsignal_explanation: str | None
+    llm_raw_answer: str | None

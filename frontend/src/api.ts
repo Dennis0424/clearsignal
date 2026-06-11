@@ -1,9 +1,19 @@
-import type { AnalyzeResponse, TradeLogEntry } from './types'
+import type { AnalyzeResponse, CompareResponse, TradeLogEntry } from './types'
 
 const BASE = ''
 
 export async function analyzeSignal(ticker: string): Promise<AnalyzeResponse> {
   const res = await fetch(`${BASE}/analyze`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticker }),
+  })
+  if (!res.ok) throw new Error(`API error: ${res.status}`)
+  return res.json()
+}
+
+export async function compareSignal(ticker: string): Promise<CompareResponse> {
+  const res = await fetch(`${BASE}/compare`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ticker }),

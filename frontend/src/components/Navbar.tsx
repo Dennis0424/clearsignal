@@ -1,8 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Activity, History, Rewind } from 'lucide-react'
+import { Activity, History, Rewind, Swords } from 'lucide-react'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: Activity },
+  { to: '/compare', label: 'Head-to-Head', icon: Swords },
   { to: '/log', label: 'Trade Log', icon: History },
   { to: '/replay', label: 'Replay', icon: Rewind },
 ]
