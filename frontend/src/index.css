@@ -1,23 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --color-primary: #1E40AF;
-  --color-primary-light: #3B82F6;
-  --color-accent: #D97706;
-  --color-bullish: #26A69A;
-  --color-bearish: #EF5350;
-  --color-surface: #1e293b;
-  --color-surface-dark: #0f172a;
-  --color-surface-light: #334155;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Core palette — Modern Dark Cinema + Gold/Purple fintech */
+  --color-bg-deep: #020617;
+  --color-bg-base: #0a0f1e;
+  --color-bg-elevated: #111827;
+  --color-bg-card: #1a2235;
+
+  /* Surfaces with glass effect */
+  --color-surface: rgba(255, 255, 255, 0.03);
+  --color-surface-light: rgba(255, 255, 255, 0.06);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+
+  /* Text */
   --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-border: #334155;
+  --color-text-secondary: #8a94a6;
+  --color-text-muted: #4b5563;
+
+  /* Accents */
+  --color-gold: #f59e0b;
+  --color-gold-light: #fbbf24;
+  --color-purple: #8b5cf6;
+  --color-purple-light: #a78bfa;
+
+  /* Semantic */
+  --color-bullish: #10b981;
+  --color-bearish: #ef4444;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-light: rgba(255, 255, 255, 0.12);
+
+  /* Legacy compat */
+  --color-primary: #8b5cf6;
+  --color-primary-light: #a78bfa;
+  --color-accent: #f59e0b;
 }
 
 body {
   margin: 0;
-  background: var(--color-surface-dark);
+  background: var(--color-bg-deep);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -28,4 +50,54 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+}
+
+/* Glassmorphism card base */
+.glass-card {
+  background: linear-gradient(135deg, rgba(26, 34, 53, 0.8), rgba(17, 24, 39, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(26, 34, 53, 0.9), rgba(17, 24, 39, 0.7));
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1), 0 0 60px rgba(245, 158, 11, 0.05);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1), 0 0 60px rgba(139, 92, 246, 0.05);
+}
+
+.glow-bullish {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1), 0 0 60px rgba(16, 185, 129, 0.05);
+}
+
+.glow-bearish {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1), 0 0 60px rgba(239, 68, 68, 0.05);
+}
+
+/* Shimmer animation for loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Subtle gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

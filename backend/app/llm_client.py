@@ -3,8 +3,8 @@ import httpx
 
 PROVIDER_CONFIGS = {
     "qwen": {
-        "endpoint": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-        "model": "qwen-plus",
+        "endpoint": "https://hackathon.bitgetops.com/v1/chat/completions",
+        "model": "qwen3.6-plus",
     },
     "claude": {
         "endpoint": "https://api.anthropic.com/v1/messages",
@@ -63,7 +63,7 @@ class LLMClient:
         }
 
     async def complete(self, prompt: str) -> str:
-        async with httpx.AsyncClient(timeout=30) as client:
+        async with httpx.AsyncClient(timeout=120) as client:
             resp = await client.post(
                 self._endpoint(),
                 headers=self._headers(),

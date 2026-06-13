@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import Compare from './pages/Compare'
 import TradeLog from './pages/TradeLog'
 import Replay from './pages/Replay'
+import DeepDive from './pages/DeepDive'
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/deep-dive" element={<DeepDive />} />
           <Route path="/compare" element={<Compare />} />
           <Route path="/log" element={<TradeLog />} />
           <Route path="/replay" element={<Replay />} />

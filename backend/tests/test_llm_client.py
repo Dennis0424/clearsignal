@@ -44,7 +44,7 @@ def test_llm_client_builds_openai_headers():
 
 def test_llm_client_endpoint_qwen():
     client = LLMClient(provider="qwen", api_key="key")
-    assert "dashscope" in client._endpoint()
+    assert "hackathon.bitgetops.com" in client._endpoint()
 
 
 def test_llm_client_endpoint_claude():
@@ -60,7 +60,7 @@ def test_llm_client_endpoint_openai():
 def test_llm_client_builds_qwen_payload():
     client = LLMClient(provider="qwen", api_key="key")
     payload = client._payload("Explain this signal")
-    assert payload["model"] == "qwen-plus"
+    assert payload["model"] == "qwen3.6-plus"
     assert payload["messages"][0]["role"] == "user"
     assert "Explain this signal" in payload["messages"][0]["content"]
 

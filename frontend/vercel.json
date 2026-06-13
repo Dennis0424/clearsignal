@@ -3,6 +3,10 @@
     { "source": "/analyze", "destination": "https://your-railway-backend.up.railway.app/analyze" },
     { "source": "/compare", "destination": "https://your-railway-backend.up.railway.app/compare" },
     { "source": "/history", "destination": "https://your-railway-backend.up.railway.app/history" },
+    { "source": "/research/:path*", "destination": "https://your-railway-backend.up.railway.app/research/:path*" },
+    { "source": "/debate/:path*", "destination": "https://your-railway-backend.up.railway.app/debate/:path*" },
+    { "source": "/trade", "destination": "https://your-railway-backend.up.railway.app/trade" },
+    { "source": "/price/:path*", "destination": "https://your-railway-backend.up.railway.app/price/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
