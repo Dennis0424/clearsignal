@@ -59,7 +59,7 @@ export default function Decisions() {
             <motion.div variants={itemVariants}><StatCard label="Win Rate" value={autopsy.win_rate != null ? `${autopsy.win_rate}%` : '—'} color="text-bullish" /></motion.div>
             <motion.div variants={itemVariants}><StatCard label="Calm Trades" value={autopsy.calm_avg_return != null ? `${autopsy.calm_avg_return > 0 ? '+' : ''}${autopsy.calm_avg_return}%` : '—'} color="text-gold" /></motion.div>
             <motion.div variants={itemVariants}><StatCard label="FOMO Trades" value={autopsy.fomo_avg_return != null ? `${autopsy.fomo_avg_return > 0 ? '+' : ''}${autopsy.fomo_avg_return}%` : '—'} color="text-bearish" /></motion.div>
-            <motion.div variants={itemVariants}><StatCard label="Avg Confidence" value={autopsy.avg_confidence != null ? `${autopsy.avg_confidence}` : '—'} color="text-purple-light" /></motion.div>
+            <motion.div variants={itemVariants}><StatCard label="Avg Confidence" value={autopsy.avg_confidence != null ? `${autopsy.avg_confidence}` : '—'} color="text-accent" /></motion.div>
           </motion.div>
 
           {/* AI Insight */}
