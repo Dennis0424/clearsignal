@@ -1,4 +1,4 @@
-import type { AnalyzeResponse, CompareResponse, TradeLogEntry, ResearchResponse, DebateResponse, TradeRequest, TradeResponse, ChartResponse, ChatResponse, FomoCheckResponse, Decision, AutopsyStats } from './types'
+import type { AnalyzeResponse, CompareResponse, TradeLogEntry, ResearchResponse, DebateResponse, TradeRequest, TradeResponse, ChartResponse, ChatResponse, FomoCheckResponse, Decision, AutopsyStats, PortfolioResponse } from './types'
 
 const BASE = ''
 
@@ -99,6 +99,12 @@ export async function getDecisions(): Promise<Decision[]> {
 
 export async function getAutopsy(): Promise<AutopsyStats> {
   const res = await fetch(`${BASE}/autopsy`)
+  if (!res.ok) throw new Error(`API error: ${res.status}`)
+  return res.json()
+}
+
+export async function getPortfolioAssets(): Promise<PortfolioResponse> {
+  const res = await fetch(`${BASE}/portfolio/assets`)
   if (!res.ok) throw new Error(`API error: ${res.status}`)
   return res.json()
 }

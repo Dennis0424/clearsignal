@@ -9,7 +9,7 @@ from signal_engine.engine import analyze
 from agents.financials import get_financials, format_financials_for_prompt
 from agents.social_pulse import get_social_pulse, format_social_for_prompt
 from agents.debate import run_debate
-from agents.trader import get_ticker_price, place_spot_order, preview_trade
+from agents.trader import get_ticker_price, place_spot_order, preview_trade, get_account_assets
 from agents.chart_data import get_price_history, get_analyst_data
 from agents.chat import chat_about_stock
 from agents.fomo_detector import check_fomo_signals, regret_simulation, generate_fomo_warning
@@ -246,3 +246,12 @@ Stats: {stats['total_trades']} total, {stats['fomo_trades']} FOMO trades, avg co
         insight = None
 
     return {**stats, "insight": insight}
+
+
+@router.get("/portfolio/assets")
+async def get_portfolio_assets():
+    """Get spot account assets from Bitget."""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_account_assets)
+    return data

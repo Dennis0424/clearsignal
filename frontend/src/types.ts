@@ -165,3 +165,16 @@ export interface AutopsyStats {
   resolved_count: number
   insight: string | null
 }
+
+export interface PortfolioAsset {
+  coin: string
+  available: string
+  frozen: string
+  locked: string
+  uTime: string
+}
+
+export interface PortfolioResponse {
+  assets?: PortfolioAsset[]
+  error?: string
+}
