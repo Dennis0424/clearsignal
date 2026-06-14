@@ -29,9 +29,7 @@ export default function Decisions() {
     <div className="max-w-7xl mx-auto px-6 py-10">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-light flex items-center justify-center glow-gold">
-          <BookOpen className="w-5 h-5 text-bg-deep" />
-        </div>
+        <BookOpen className="w-5 h-5 text-accent" />
         <div>
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Decisions</h1>
           <p className="text-text-secondary text-sm">Journal + Autopsy Report</p>
@@ -50,10 +48,10 @@ export default function Decisions() {
 
           {/* AI Insight */}
           {autopsy.insight && (
-            <div className="glass-card p-5 mb-6 border-purple/20 glow-purple">
+            <div className="bg-bg-card border border-border border-l-2 border-l-accent rounded-xl p-5 mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-purple-light" />
-                <span className="text-[11px] font-semibold text-purple-light uppercase tracking-wide">AI Insight</span>
+                <Sparkles className="w-4 h-4 text-accent" />
+                <span className="text-[11px] font-semibold text-accent uppercase tracking-wide">AI Insight</span>
               </div>
               <p className="text-sm text-text-primary leading-relaxed">{autopsy.insight}</p>
             </div>
@@ -62,7 +60,7 @@ export default function Decisions() {
       )}
 
       {/* Decision Journal */}
-      <div className="glass-card p-6">
+      <div className="bg-bg-card border border-border rounded-xl p-6">
         <h2 className="text-base font-semibold text-text-primary mb-4">Decision Journal</h2>
 
         {decisions.length === 0 ? (
@@ -73,7 +71,7 @@ export default function Decisions() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <div className="space-y-1 min-w-[600px]">
+            <div className="min-w-[600px]">
               {/* Header */}
               <div className="grid grid-cols-[1fr_2fr_0.7fr_0.7fr_0.7fr] gap-3 px-4 py-2 text-[11px] text-text-muted uppercase tracking-wide">
                 <div>Ticker</div>
@@ -84,14 +82,14 @@ export default function Decisions() {
               </div>
               {/* Rows */}
               {decisions.map((d) => (
-                <div key={d.id} className="grid grid-cols-[1fr_2fr_0.7fr_0.7fr_0.7fr] gap-3 px-4 py-3 bg-surface/50 rounded-xl border border-border items-center">
+                <div key={d.id} className="grid grid-cols-[1fr_2fr_0.7fr_0.7fr_0.7fr] gap-3 px-4 py-3 border-b border-border items-center">
                   <div className="font-semibold text-sm text-text-primary">{d.ticker}</div>
                   <div className="text-xs text-text-secondary truncate">{d.reasoning}</div>
                   <div>
                     <FomoBadge level={d.fomo_score} />
                   </div>
-                  <div className="text-sm text-text-primary tabular-nums">{d.confidence}/10</div>
-                  <div className="text-sm font-medium tabular-nums">
+                  <div className="text-sm text-text-primary font-mono">{d.confidence}/10</div>
+                  <div className="text-sm font-medium font-mono">
                     {d.outcome_pct != null ? (
                       <span className={d.outcome_pct >= 0 ? 'text-bullish' : 'text-bearish'}>
                         {d.outcome_pct >= 0 ? '+' : ''}{d.outcome_pct}%
@@ -112,8 +110,8 @@ export default function Decisions() {
 
 function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="glass-card p-4 text-center">
-      <div className={`text-xl font-bold ${color} tabular-nums`}>{value}</div>
+    <div className="bg-bg-card border border-border rounded-xl p-4 text-center">
+      <div className={`text-xl font-bold ${color} font-mono`}>{value}</div>
       <div className="text-[10px] text-text-muted uppercase tracking-wide mt-1">{label}</div>
     </div>
   )
@@ -121,12 +119,12 @@ function StatCard({ label, value, color }: { label: string; value: string; color
 
 function FomoBadge({ level }: { level: string }) {
   const styles: Record<string, string> = {
-    LOW: 'bg-bullish/10 text-bullish',
-    MODERATE: 'bg-gold/10 text-gold',
-    HIGH: 'bg-bearish/10 text-bearish',
+    LOW: 'text-bullish',
+    MODERATE: 'text-gold',
+    HIGH: 'text-bearish',
   }
   const style = styles[level] || styles.LOW
-  return <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${style}`}>{level}</span>
+  return <span className={`text-[11px] font-semibold ${style}`}>{level}</span>
 }
 
 function LoadingState() {
@@ -134,9 +132,9 @@ function LoadingState() {
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="h-8 shimmer rounded w-48 mb-8" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[1, 2, 3, 4].map(i => <div key={i} className="glass-card p-4"><div className="h-8 shimmer rounded mb-2" /><div className="h-3 shimmer rounded w-2/3 mx-auto" /></div>)}
+        {[1, 2, 3, 4].map(i => <div key={i} className="bg-bg-card border border-border rounded-xl p-4"><div className="h-8 shimmer rounded mb-2" /><div className="h-3 shimmer rounded w-2/3 mx-auto" /></div>)}
       </div>
-      <div className="glass-card p-6">
+      <div className="bg-bg-card border border-border rounded-xl p-6">
         <div className="h-5 shimmer rounded w-40 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3].map(i => <div key={i} className="h-12 shimmer rounded-xl" />)}
