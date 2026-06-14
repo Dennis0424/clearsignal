@@ -1,7 +1,23 @@
 import { useState, useEffect } from 'react'
 import { BookOpen, Brain, Sparkles } from 'lucide-react'
+import { motion } from 'motion/react'
 import { getDecisions, getAutopsy } from '../api'
 import type { Decision, AutopsyStats } from '../types'
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+}
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
+}
 
 export default function Decisions() {
   const [decisions, setDecisions] = useState<Decision[]>([])
@@ -26,41 +42,41 @@ export default function Decisions() {
   if (loading) return <LoadingState />
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <motion.div className="max-w-7xl mx-auto px-6 py-10" variants={pageVariants} initial="hidden" animate="visible">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <motion.div className="flex items-center gap-3 mb-8" variants={itemVariants}>
         <BookOpen className="w-5 h-5 text-accent" />
         <div>
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Decisions</h1>
           <p className="text-text-secondary text-sm">Journal + Autopsy Report</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Autopsy Stats */}
       {autopsy && autopsy.total_trades > 0 && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <StatCard label="Win Rate" value={autopsy.win_rate != null ? `${autopsy.win_rate}%` : '—'} color="text-bullish" />
-            <StatCard label="Calm Trades" value={autopsy.calm_avg_return != null ? `${autopsy.calm_avg_return > 0 ? '+' : ''}${autopsy.calm_avg_return}%` : '—'} color="text-gold" />
-            <StatCard label="FOMO Trades" value={autopsy.fomo_avg_return != null ? `${autopsy.fomo_avg_return > 0 ? '+' : ''}${autopsy.fomo_avg_return}%` : '—'} color="text-bearish" />
-            <StatCard label="Avg Confidence" value={autopsy.avg_confidence != null ? `${autopsy.avg_confidence}` : '—'} color="text-purple-light" />
-          </div>
+          <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" variants={containerVariants} initial="hidden" animate="visible">
+            <motion.div variants={itemVariants}><StatCard label="Win Rate" value={autopsy.win_rate != null ? `${autopsy.win_rate}%` : '—'} color="text-bullish" /></motion.div>
+            <motion.div variants={itemVariants}><StatCard label="Calm Trades" value={autopsy.calm_avg_return != null ? `${autopsy.calm_avg_return > 0 ? '+' : ''}${autopsy.calm_avg_return}%` : '—'} color="text-gold" /></motion.div>
+            <motion.div variants={itemVariants}><StatCard label="FOMO Trades" value={autopsy.fomo_avg_return != null ? `${autopsy.fomo_avg_return > 0 ? '+' : ''}${autopsy.fomo_avg_return}%` : '—'} color="text-bearish" /></motion.div>
+            <motion.div variants={itemVariants}><StatCard label="Avg Confidence" value={autopsy.avg_confidence != null ? `${autopsy.avg_confidence}` : '—'} color="text-purple-light" /></motion.div>
+          </motion.div>
 
           {/* AI Insight */}
           {autopsy.insight && (
-            <div className="bg-bg-card border border-border border-l-2 border-l-accent rounded-xl p-5 mb-6">
+            <motion.div className="bg-bg-card border-y border-r border-border border-l-2 border-l-accent rounded-xl p-5 mb-6" variants={itemVariants} initial="hidden" animate="visible">
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-4 h-4 text-accent" />
                 <span className="text-[11px] font-semibold text-accent uppercase tracking-wide">AI Insight</span>
               </div>
               <p className="text-sm text-text-primary leading-relaxed">{autopsy.insight}</p>
-            </div>
+            </motion.div>
           )}
         </>
       )}
 
       {/* Decision Journal */}
-      <div className="bg-bg-card border border-border rounded-xl p-6">
+      <motion.div className="bg-bg-card border border-border rounded-xl p-6" variants={itemVariants} initial="hidden" animate="visible">
         <h2 className="text-base font-semibold text-text-primary mb-4">Decision Journal</h2>
 
         {decisions.length === 0 ? (
@@ -103,8 +119,8 @@ export default function Decisions() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

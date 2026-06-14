@@ -1,7 +1,23 @@
 import { useState } from 'react'
 import { Wallet, Link2, KeyRound, AlertTriangle, CheckCircle } from 'lucide-react'
+import { motion } from 'motion/react'
 import { getPortfolioAssets } from '../api'
 import type { PortfolioAsset } from '../types'
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+}
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
+}
 
 export default function Portfolio() {
   const [connected, setConnected] = useState(false)
@@ -43,20 +59,20 @@ export default function Portfolio() {
   const nonZeroAssets = assets.filter(a => parseFloat(a.available) > 0 || parseFloat(a.frozen) > 0)
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
+    <motion.div className="max-w-7xl mx-auto px-6 py-10" variants={pageVariants} initial="hidden" animate="visible">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
+      <motion.div className="flex items-center gap-3 mb-8" variants={itemVariants}>
         <Wallet className="w-5 h-5 text-accent" />
         <div>
           <h1 className="text-2xl font-bold text-text-primary tracking-tight">Portfolio</h1>
           <p className="text-text-secondary text-sm">Connect to Bitget to view your holdings</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Connect Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8" variants={containerVariants} initial="hidden" animate="visible">
         {/* Wallet Connect (placeholder for wagmi) */}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <motion.div className="bg-bg-card border border-border rounded-xl p-5" variants={itemVariants}>
           <div className="flex items-center gap-2 mb-3">
             <Link2 className="w-4 h-4 text-text-secondary" />
             <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Web3 Wallet</span>
@@ -65,10 +81,10 @@ export default function Portfolio() {
             Connect MetaMask
           </button>
           <p className="text-[10px] text-text-muted mt-2 text-center">Coming soon — wagmi integration</p>
-        </div>
+        </motion.div>
 
         {/* Bitget API Connect */}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <motion.div className="bg-bg-card border border-border rounded-xl p-5" variants={itemVariants}>
           <div className="flex items-center gap-2 mb-3">
             <KeyRound className="w-4 h-4 text-accent" />
             <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Bitget API</span>
@@ -97,8 +113,8 @@ export default function Portfolio() {
               Enter API Keys
             </button>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Error */}
       {error && (
@@ -156,12 +172,12 @@ export default function Portfolio() {
 
       {/* Empty state when not connected */}
       {!connected && !loading && !error && (
-        <div className="bg-bg-card border border-border rounded-xl p-12 text-center">
+        <motion.div className="bg-bg-card border border-border rounded-xl p-12 text-center" variants={itemVariants} initial="hidden" animate="visible">
           <Wallet className="w-10 h-10 text-text-muted mx-auto mb-4" />
           <h3 className="text-base font-semibold text-text-primary mb-2">Connect to see your portfolio</h3>
           <p className="text-sm text-text-secondary max-w-sm mx-auto">Enter your Bitget API keys above to view your spot holdings. Keys are stored locally and never sent to our servers.</p>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

@@ -1,8 +1,19 @@
 import { useState, useRef, useEffect } from 'react'
+import { motion } from 'motion/react'
 import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Swords, Microscope, Send, Bot, User, Shield, Brain } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
+
+const pageVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
+}
 
 export default function DeepDive() {
   const [ticker, setTicker] = useState('')
@@ -37,8 +48,8 @@ export default function DeepDive() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-      <div className="mb-10">
+    <motion.div className="max-w-7xl mx-auto px-6 py-10" variants={pageVariants} initial="hidden" animate="visible">
+      <motion.div className="mb-10" variants={itemVariants}>
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
             <Microscope className="w-5 h-5 text-accent" />
@@ -48,9 +59,9 @@ export default function DeepDive() {
             <p className="text-text-secondary text-sm">Multi-agent research + Bull vs Bear debate</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <form onSubmit={handleSubmit} className="flex gap-3 mb-10">
+      <motion.form onSubmit={handleSubmit} className="flex gap-3 mb-10" variants={itemVariants}>
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
@@ -69,7 +80,7 @@ export default function DeepDive() {
           <Zap className="w-4 h-4" />
           {loading ? 'Analyzing...' : 'Research & Debate'}
         </button>
-      </form>
+      </motion.form>
 
       {loading && <LoadingState />}
       {error && (
@@ -79,7 +90,7 @@ export default function DeepDive() {
         </div>
       )}
       {data && <Results data={data} chartData={chartData} activeTicker={activeTicker} />}
-    </div>
+    </motion.div>
   )
 }
 
