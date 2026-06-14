@@ -40,8 +40,8 @@ export default function DeepDive() {
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple to-purple-light flex items-center justify-center glow-purple">
-            <Microscope className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
+            <Microscope className="w-5 h-5 text-accent" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-text-primary tracking-tight">Deep Dive</h1>
@@ -58,13 +58,13 @@ export default function DeepDive() {
             value={ticker}
             onChange={e => setTicker(e.target.value.toUpperCase())}
             placeholder="Enter ticker (e.g. AAPL)"
-            className="w-full pl-11 pr-4 py-3 bg-bg-elevated border border-border rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple/50 focus:ring-2 focus:ring-purple/20 text-sm transition-all duration-200"
+            className="w-full pl-11 pr-4 py-3 bg-bg-elevated border border-border rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 text-sm transition-all duration-200"
           />
         </div>
         <button
           type="submit"
           disabled={loading || !ticker.trim()}
-          className="px-6 py-3 bg-gradient-to-r from-purple to-purple-light text-white rounded-xl font-medium text-sm hover:opacity-90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2 glow-purple"
+          className="px-6 py-3 bg-accent text-bg-deep rounded-xl font-medium text-sm hover:bg-accent-light transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
         >
           <Zap className="w-4 h-4" />
           {loading ? 'Analyzing...' : 'Research & Debate'}
@@ -171,7 +171,7 @@ function PriceChart({ data, ticker }: { data: PricePoint[]; ticker: string }) {
             <XAxis dataKey="date" hide />
             <YAxis hide domain={['dataMin', 'dataMax']} />
             <Tooltip
-              contentStyle={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px' }}
+              contentStyle={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '12px' }}
               labelStyle={{ color: '#8a94a6' }}
               itemStyle={{ color: '#f1f5f9' }}
               formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Price']}
@@ -213,7 +213,7 @@ function FinancialsCard({ data }: { data: Record<string, string | number> }) {
   ]
 
   return (
-    <div className="glass-card p-6 glow-gold">
+    <div className="glass-card p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
           <BarChart3 className="w-4 h-4 text-gold" />
@@ -229,7 +229,7 @@ function FinancialsCard({ data }: { data: Record<string, string | number> }) {
           <span className="text-3xl font-bold text-text-primary tabular-nums">${Number(data.current_price).toFixed(2)}</span>
         )}
         {data.sector && (
-          <span className="px-2.5 py-1 text-xs bg-purple/10 text-purple-light rounded-lg font-medium">{String(data.sector)}</span>
+          <span className="px-2.5 py-1 text-xs bg-accent/10 text-accent rounded-lg font-medium">{String(data.sector)}</span>
         )}
       </div>
 
@@ -265,8 +265,8 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
   return (
     <div className="glass-card p-6">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-purple/10 flex items-center justify-center">
-          <MessageCircle className="w-4 h-4 text-purple-light" />
+        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+          <MessageCircle className="w-4 h-4 text-accent" />
         </div>
         <div>
           <h2 className="text-base font-semibold text-text-primary">Social & News</h2>
@@ -280,7 +280,7 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
           <div className="text-[11px] text-text-muted uppercase tracking-wide mt-0.5">Reddit</div>
         </div>
         <div className="flex-1 px-4 py-3 bg-surface rounded-xl border border-border text-center">
-          <div className="text-2xl font-bold text-purple-light tabular-nums">{news_headlines.length}</div>
+          <div className="text-2xl font-bold text-accent tabular-nums">{news_headlines.length}</div>
           <div className="text-[11px] text-text-muted uppercase tracking-wide mt-0.5">News</div>
         </div>
       </div>
@@ -351,12 +351,12 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
         </div>
       </div>
 
-      <div className="rounded-xl p-5 bg-gradient-to-r from-purple/[0.06] to-gold/[0.04] border border-purple/20">
+      <div className="rounded-xl p-5 bg-bg-elevated border border-border">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-6 h-6 rounded-full bg-purple/15 flex items-center justify-center">
-            <Scale className="w-3.5 h-3.5 text-purple-light" />
+          <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
+            <Scale className="w-3.5 h-3.5 text-accent" />
           </div>
-          <span className="text-sm font-semibold text-purple-light">Judge Verdict</span>
+          <span className="text-sm font-semibold text-text-secondary">Judge Verdict</span>
         </div>
         <p className="text-sm text-text-primary/90 leading-relaxed">{debate.judge}</p>
       </div>
@@ -426,7 +426,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
             <div className="flex-1">
               <label className="block text-[11px] text-text-muted uppercase tracking-wide mb-1.5">Quantity</label>
               <input type="number" step="any" min="0" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="0.00"
-                className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple/50 focus:ring-2 focus:ring-purple/20 tabular-nums transition-all duration-200" />
+                className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 tabular-nums transition-all duration-200" />
             </div>
           </div>
           {price > 0 && quantity && (
@@ -436,7 +436,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
             </div>
           )}
           <button onClick={handleFomoCheck} disabled={loading || !quantity}
-            className="w-full px-4 py-2.5 bg-gradient-to-r from-purple to-purple-light text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
+            className="w-full px-4 py-2.5 bg-accent text-bg-deep rounded-xl text-sm font-medium hover:bg-accent-light transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
             <Shield className="w-4 h-4" /> {loading ? 'Checking...' : 'Check & Trade'}
           </button>
         </div>
@@ -486,19 +486,19 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
       {step === 'journal' && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 mb-1">
-            <Brain className="w-4 h-4 text-purple-light" />
+            <Brain className="w-4 h-4 text-accent" />
             <span className="text-sm font-medium text-text-primary">Decision Journal</span>
           </div>
           <div>
             <label className="block text-[11px] text-text-muted uppercase tracking-wide mb-1.5">Why are you buying {ticker} today?</label>
             <textarea value={reasoning} onChange={e => setReasoning(e.target.value)} rows={2} placeholder="Your reasoning..."
-              className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple/50 focus:ring-2 focus:ring-purple/20 resize-none transition-all duration-200" />
+              className="w-full px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 resize-none transition-all duration-200" />
           </div>
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-[11px] text-text-muted uppercase tracking-wide mb-1.5">Confidence</label>
-              <input type="range" min={1} max={10} value={confidence} onChange={e => setConfidence(Number(e.target.value))} className="w-full accent-purple" />
-              <div className="text-center text-sm font-semibold text-purple-light tabular-nums">{confidence}/10</div>
+              <input type="range" min={1} max={10} value={confidence} onChange={e => setConfidence(Number(e.target.value))} className="w-full accent-emerald-500" />
+              <div className="text-center text-sm font-semibold text-accent tabular-nums">{confidence}/10</div>
             </div>
             <div className="flex-1">
               <label className="block text-[11px] text-text-muted uppercase tracking-wide mb-1.5">Horizon</label>
@@ -598,14 +598,14 @@ function ChatPanel({ ticker }: { ticker: string }) {
             )}
             <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs leading-relaxed ${
               msg.role === 'user'
-                ? 'bg-purple/15 text-text-primary border border-purple/20'
+                ? 'bg-accent/10 text-text-primary border border-accent/20'
                 : 'bg-surface text-text-primary border border-border'
             }`}>
               {msg.content}
             </div>
             {msg.role === 'user' && (
-              <div className="w-5 h-5 rounded-full bg-purple/10 flex items-center justify-center shrink-0 mt-0.5">
-                <User className="w-3 h-3 text-purple-light" />
+              <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                <User className="w-3 h-3 text-accent" />
               </div>
             )}
           </div>
@@ -633,7 +633,7 @@ function ChatPanel({ ticker }: { ticker: string }) {
           value={input}
           onChange={e => setInput(e.target.value)}
           placeholder={`Ask about ${ticker}...`}
-          className="flex-1 px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-purple/50 focus:ring-2 focus:ring-purple/20 transition-all duration-200"
+          className="flex-1 px-3 py-2.5 bg-bg-elevated border border-border rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 transition-all duration-200"
         />
         <button
           type="submit"
