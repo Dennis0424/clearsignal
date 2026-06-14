@@ -141,7 +141,7 @@ function FeatureCard({ icon, iconBg, title, description }: { icon: React.ReactNo
   )
 }
 
-function Step({ number, color, icon, title, description }: { number: number; color: string; icon: React.ReactNode; title: string; description: string }) {
+function Step({ number: _number, color, icon, title, description }: { number: number; color: string; icon: React.ReactNode; title: string; description: string }) {
   return (
     <div className="reveal flex-1 text-center">
       <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center mx-auto mb-3 text-white font-bold text-sm`}>

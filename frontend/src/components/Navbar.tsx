@@ -26,14 +26,14 @@ export default function Navbar() {
             <Link
               key={to}
               to={to}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
                 pathname === to
                   ? 'bg-purple/15 text-purple-light border border-purple/30'
                   : 'text-text-secondary hover:text-text-primary hover:bg-surface-hover'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {label}
+              <span className="hidden md:inline">{label}</span>
             </Link>
           ))}
         </div>
