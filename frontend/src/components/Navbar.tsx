@@ -1,12 +1,10 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Activity, History, Rewind, Swords, Microscope } from 'lucide-react'
+import { Activity, Microscope, Wallet, BookOpen } from 'lucide-react'
 
 const links = [
-  { to: '/', label: 'Dashboard', icon: Activity },
-  { to: '/deep-dive', label: 'Deep Dive', icon: Microscope },
-  { to: '/compare', label: 'Head-to-Head', icon: Swords },
-  { to: '/log', label: 'Trade Log', icon: History },
-  { to: '/replay', label: 'Replay', icon: Rewind },
+  { to: '/research', label: 'Research', icon: Microscope },
+  { to: '/portfolio', label: 'Portfolio', icon: Wallet },
+  { to: '/decisions', label: 'Decisions', icon: BookOpen },
 ]
 
 export default function Navbar() {
