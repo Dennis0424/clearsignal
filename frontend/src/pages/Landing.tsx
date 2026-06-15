@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'motion/react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -92,6 +92,160 @@ const cardVariants = {
     y: 0,
     transition: { type: 'spring', stiffness: 80, damping: 16 },
   },
+}
+
+/* ─── Apple-style sticky scroll feature tour ─── */
+function ScrollFeatureSection() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [activeStep, setActiveStep] = useState(0)
+
+  const steps = [
+    {
+      label: 'Multi-Agent Scoring',
+      heading: 'Five AI agents argue so you don\'t have to.',
+      body: 'Technical, sentiment, macro, news, and market intel — each module scores independently. No single point of failure. No echo chamber.',
+      highlight: 'technical',
+    },
+    {
+      label: 'FOMO Guardian',
+      heading: 'Your behavioral blind spots, exposed.',
+      body: 'Before you trade, a behavioral analysis scores your emotional state. Consecutive green days, recent losses, position sizing errors — all flagged.',
+      highlight: 'fomo',
+    },
+    {
+      label: 'Decision Journal',
+      heading: 'Every trade is a bet. Track whether you\'re right.',
+      body: 'Log your reasoning and confidence before executing. Review outcomes. The journal turns gut feeling into data.',
+      highlight: 'journal',
+    },
+    {
+      label: 'Bitget Execution',
+      heading: 'Research to order in one flow.',
+      body: 'No tab switching. No copy-pasting tickers. Connect your Bitget API and execute directly from the research interface.',
+      highlight: 'execute',
+    },
+  ]
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    const ctx = gsap.context(() => {
+      steps.forEach((_, i) => {
+        ScrollTrigger.create({
+          trigger: containerRef.current,
+          start: `top+=${i * 25}% center`,
+          end: `top+=${(i + 1) * 25}% center`,
+          onEnter: () => setActiveStep(i),
+          onEnterBack: () => setActiveStep(i),
+        })
+      })
+    }, containerRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const agentRows = [
+    { key: 'technical', label: 'Technical', value: '+1.4σ', color: 'text-bullish' },
+    { key: 'fomo', label: 'FOMO Check', value: 'LOW', color: 'text-accent' },
+    { key: 'journal', label: 'Journal', value: 'Logged', color: 'text-gold' },
+    { key: 'execute', label: 'Execution', value: 'Ready', color: 'text-accent' },
+  ]
+
+  return (
+    <section className="px-6 md:px-12 py-24 border-t border-border">
+      <div className="max-w-7xl mx-auto">
+        {/* Section label */}
+        <div className="flex items-center gap-3 mb-16">
+          <div className="h-[1px] w-8 bg-accent" />
+          <span className="text-xs font-mono text-accent uppercase tracking-[0.16em]">Platform Tour</span>
+        </div>
+
+        {/* Sticky scroll container — tall enough for 4 scroll steps */}
+        <div ref={containerRef} className="relative h-[300vh]">
+          <div className="sticky top-[15vh] grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-16 items-center">
+
+            {/* Left: swapping text */}
+            <div className="relative min-h-[280px]">
+              {steps.map((step, i) => (
+                <motion.div
+                  key={i}
+                  initial={false}
+                  animate={activeStep === i
+                    ? { opacity: 1, y: 0, pointerEvents: 'auto' }
+                    : { opacity: 0, y: activeStep > i ? -16 : 16, pointerEvents: 'none' }
+                  }
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="absolute inset-0"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xs font-mono text-accent">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="text-xs font-mono text-text-muted uppercase tracking-widest">{step.label}</span>
+                  </div>
+                  <h2 className="text-3xl md:text-4xl font-bold text-text-primary tracking-tight leading-[1.1] mb-5">
+                    {step.heading}
+                  </h2>
+                  <p className="text-base text-text-secondary leading-relaxed max-w-[46ch]">
+                    {step.body}
+                  </p>
+                </motion.div>
+              ))}
+
+              {/* Step dots */}
+              <div className="absolute bottom-0 flex items-center gap-2">
+                {steps.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-[2px] transition-all duration-300 rounded-full ${activeStep === i ? 'w-6 bg-accent' : 'w-2 bg-border'}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Right: product UI that highlights active row */}
+            <div className="hidden lg:block bg-bg-card border border-border rounded-xl p-5 shadow-2xl shadow-black/40">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  <span className="text-xs font-mono text-text-muted">AAPL — Live Analysis</span>
+                </div>
+                <span className="text-xs font-mono text-text-muted">Score 7.2/10</span>
+              </div>
+              <div className="space-y-1">
+                {agentRows.map((row) => (
+                  <motion.div
+                    key={row.key}
+                    animate={steps[activeStep]?.highlight === row.key
+                      ? { backgroundColor: 'rgba(16,185,129,0.06)', x: 2 }
+                      : { backgroundColor: 'rgba(0,0,0,0)', x: 0 }
+                    }
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="flex items-center justify-between py-2.5 px-3 rounded-lg border border-transparent"
+                    style={steps[activeStep]?.highlight === row.key ? { borderColor: 'rgba(16,185,129,0.15)' } : {}}
+                  >
+                    <span className="text-xs text-text-secondary">{row.label}</span>
+                    <span className={`text-xs font-mono font-semibold ${steps[activeStep]?.highlight === row.key ? row.color : 'text-text-muted'}`}>
+                      {row.value}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="mt-4 pt-3 border-t border-border">
+                <div className="text-xs font-mono text-text-muted mb-1">Confluence</div>
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map((n) => (
+                    <div key={n} className={`h-1 flex-1 rounded-full ${n <= 4 ? 'bg-accent' : 'bg-border'}`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  )
 }
 
 export default function Landing() {
@@ -352,6 +506,8 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      <ScrollFeatureSection />
 
       {/* How it works - horizontal numbered steps, no gradient circles */}
       <section className="px-6 md:px-12 py-24 border-t border-border">
