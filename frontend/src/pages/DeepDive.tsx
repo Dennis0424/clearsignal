@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion } from 'motion/react'
-import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Swords, Microscope, Send, Bot, User, Shield, Brain } from 'lucide-react'
+import { motion, useInView } from 'motion/react'
+import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -331,46 +331,70 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
 }
 
 function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-border">
-          <Swords className="w-4 h-4 text-text-secondary" />
-        </div>
-        <h2 className="text-base font-semibold text-text-primary">Bull vs Bear Debate</h2>
+    <div className="bg-bg-card border border-border rounded-xl p-6" ref={ref}>
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-6">
+        <span className="text-base font-bold text-text-primary tracking-tight">The Debate</span>
+        <span className="text-xs font-mono text-text-muted ml-1">bull vs bear</span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-        <div className="rounded-xl p-5 bg-bullish/[0.04] border border-bullish/20 glow-bullish">
+      {/* Battle arena */}
+      <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-0 items-start mb-5">
+        {/* Bull */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.1 }}
+          className="rounded-xl p-5 bg-bullish/[0.05] border border-bullish/25 md:rounded-r-none relative"
+        >
+          {/* Speech bubble tail (desktop only) — points right */}
+          <div className="hidden md:block absolute top-8 -right-[9px] w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[9px] border-l-bullish/25" />
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-bullish/15 flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-bullish" />
-            </div>
-            <span className="text-sm font-semibold text-bullish">Bull Case</span>
+            <span className="text-2xl leading-none">🐂</span>
+            <span className="text-[10px] font-mono font-bold text-bullish uppercase tracking-widest">Bull Screams</span>
           </div>
           <p className="text-sm text-text-primary/90 leading-relaxed">{debate.bull}</p>
+        </motion.div>
+
+        {/* VS divider */}
+        <div className="hidden md:flex flex-col items-center justify-start pt-6 px-3 shrink-0">
+          <span className="text-xs font-black text-text-muted/40 tracking-widest rotate-0 select-none">VS</span>
         </div>
 
-        <div className="rounded-xl p-5 bg-bearish/[0.04] border border-bearish/20 glow-bearish">
+        {/* Bear */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
+          transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.1 }}
+          className="rounded-xl p-5 bg-bearish/[0.05] border border-bearish/25 md:rounded-l-none relative"
+        >
+          {/* Speech bubble tail (desktop only) — points left */}
+          <div className="hidden md:block absolute top-8 -left-[9px] w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[9px] border-r-bearish/25" />
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-bearish/15 flex items-center justify-center">
-              <TrendingDown className="w-3.5 h-3.5 text-bearish" />
-            </div>
-            <span className="text-sm font-semibold text-bearish">Bear Case</span>
+            <span className="text-2xl leading-none">🐻</span>
+            <span className="text-[10px] font-mono font-bold text-bearish uppercase tracking-widest">Bear Growls</span>
           </div>
           <p className="text-sm text-text-primary/90 leading-relaxed">{debate.bear}</p>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="rounded-xl p-5 bg-bg-elevated border border-border">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center">
-            <Scale className="w-3.5 h-3.5 text-accent" />
-          </div>
-          <span className="text-sm font-semibold text-text-secondary">Judge Verdict</span>
+      {/* Judge verdict — stamp treatment */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.35 }}
+        className="-rotate-[0.4deg] rounded-xl p-5 bg-bg-elevated border border-border"
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-base leading-none">⚖️</span>
+          <span className="text-[10px] font-mono font-black text-text-muted uppercase tracking-[0.15em]">The Verdict</span>
         </div>
         <p className="text-sm text-text-primary/90 leading-relaxed">{debate.judge}</p>
-      </div>
+      </motion.div>
     </div>
   )
 }
