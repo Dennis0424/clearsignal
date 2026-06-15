@@ -335,65 +335,103 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
   const isInView = useInView(ref, { once: true, margin: '-60px' })
 
   return (
-    <div className="bg-bg-card border border-border rounded-xl p-6" ref={ref}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-6">
-        <span className="text-base font-bold text-text-primary tracking-tight">The Debate</span>
-        <span className="text-xs font-mono text-text-muted ml-1">bull vs bear</span>
-      </div>
-
-      {/* Battle arena */}
-      <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 md:gap-0 items-start mb-5">
-        {/* Bull */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-          transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.1 }}
-          className="rounded-xl p-5 bg-bullish/[0.05] border border-bullish/25 md:rounded-r-none relative"
-        >
-          {/* Speech bubble tail (desktop only) — points right */}
-          <div className="hidden md:block absolute top-8 -right-[9px] w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-l-[9px] border-l-bullish/25" />
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl leading-none">🐂</span>
-            <span className="text-[10px] font-mono font-bold text-bullish uppercase tracking-widest">Bull Screams</span>
-          </div>
-          <p className="text-sm text-text-primary/90 leading-relaxed">{debate.bull}</p>
-        </motion.div>
-
-        {/* VS divider */}
-        <div className="hidden md:flex flex-col items-center justify-start pt-6 px-3 shrink-0">
-          <span className="text-xs font-black text-text-muted/40 tracking-widest rotate-0 select-none">VS</span>
+    <div ref={ref} className="rounded-xl overflow-hidden border border-border">
+      {/* Header bar — full width dark strip */}
+      <div className="bg-bg-elevated border-b border-border px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono font-bold text-text-muted uppercase tracking-[0.18em]">Multi-Agent Debate</span>
         </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-bullish animate-pulse" />
+          <span className="text-[10px] font-mono text-text-muted">live</span>
+        </div>
+      </div>
 
-        {/* Bear */}
+      {/* Arena — two columns, no padding between, hard split */}
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        {/* Bull side */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
-          transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.1 }}
-          className="rounded-xl p-5 bg-bearish/[0.05] border border-bearish/25 md:rounded-l-none relative"
+          initial={{ opacity: 0, x: -24 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -24 }}
+          transition={{ type: 'spring', stiffness: 70, damping: 18, delay: 0.05 }}
+          className="relative p-6 bg-bullish/[0.04] border-r border-border"
         >
-          {/* Speech bubble tail (desktop only) — points left */}
-          <div className="hidden md:block absolute top-8 -left-[9px] w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[9px] border-r-bearish/25" />
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-2xl leading-none">🐻</span>
-            <span className="text-[10px] font-mono font-bold text-bearish uppercase tracking-widest">Bear Growls</span>
+          {/* Colored top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-bullish/60" />
+
+          {/* Character header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-bullish/10 border border-bullish/20 flex items-center justify-center text-xl leading-none select-none">
+              🐂
+            </div>
+            <div>
+              <div className="text-xs font-black text-bullish uppercase tracking-[0.12em]">Bull Case</div>
+              <div className="text-[10px] text-text-muted font-mono">long thesis</div>
+            </div>
           </div>
-          <p className="text-sm text-text-primary/90 leading-relaxed">{debate.bear}</p>
+
+          <p className="text-sm text-text-primary/85 leading-relaxed">{debate.bull}</p>
+
+          {/* Bottom tag */}
+          <div className="mt-4 pt-3 border-t border-bullish/10 flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-bullish" />
+            <span className="text-[10px] font-mono text-bullish/70">Arguing: BUY</span>
+          </div>
+        </motion.div>
+
+        {/* Bear side */}
+        <motion.div
+          initial={{ opacity: 0, x: 24 }}
+          animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 24 }}
+          transition={{ type: 'spring', stiffness: 70, damping: 18, delay: 0.05 }}
+          className="relative p-6 bg-bearish/[0.04]"
+        >
+          {/* Colored top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-bearish/60" />
+
+          {/* Character header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-bearish/10 border border-bearish/20 flex items-center justify-center text-xl leading-none select-none">
+              🐻
+            </div>
+            <div>
+              <div className="text-xs font-black text-bearish uppercase tracking-[0.12em]">Bear Case</div>
+              <div className="text-[10px] text-text-muted font-mono">short thesis</div>
+            </div>
+          </div>
+
+          <p className="text-sm text-text-primary/85 leading-relaxed">{debate.bear}</p>
+
+          {/* Bottom tag */}
+          <div className="mt-4 pt-3 border-t border-bearish/10 flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-bearish" />
+            <span className="text-[10px] font-mono text-bearish/70">Arguing: SELL</span>
+          </div>
         </motion.div>
       </div>
 
-      {/* Judge verdict — stamp treatment */}
+      {/* Verdict — full width, distinct treatment */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-        transition={{ type: 'spring', stiffness: 80, damping: 16, delay: 0.35 }}
-        className="-rotate-[0.4deg] rounded-xl p-5 bg-bg-elevated border border-border"
+        initial={{ opacity: 0, y: 16 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+        transition={{ type: 'spring', stiffness: 60, damping: 18, delay: 0.3 }}
+        className="relative border-t border-border bg-bg-card px-6 py-5"
       >
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-base leading-none">⚖️</span>
-          <span className="text-[10px] font-mono font-black text-text-muted uppercase tracking-[0.15em]">The Verdict</span>
+        {/* Top accent — neutral */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-bullish/40 via-text-muted/20 to-bearish/40" />
+
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl bg-bg-elevated border border-border flex items-center justify-center text-lg leading-none shrink-0 select-none mt-0.5">
+            ⚖️
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-black text-text-primary uppercase tracking-[0.12em]">Judge Verdict</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-bg-elevated border border-border text-text-muted rounded uppercase tracking-wide">AI Impartial</span>
+            </div>
+            <p className="text-sm text-text-primary/85 leading-relaxed">{debate.judge}</p>
+          </div>
         </div>
-        <p className="text-sm text-text-primary/90 leading-relaxed">{debate.judge}</p>
       </motion.div>
     </div>
   )
