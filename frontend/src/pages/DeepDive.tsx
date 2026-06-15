@@ -330,6 +330,51 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
   )
 }
 
+/* ─── Live typewriter for debate text ─── */
+function TypewriterText({ text, isInView, delay = 0, className = '' }: {
+  text: string
+  isInView: boolean
+  delay?: number
+  className?: string
+}) {
+  const [displayed, setDisplayed] = useState('')
+  const [started, setStarted] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const frameRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (!isInView || started) return
+    timerRef.current = setTimeout(() => {
+      setStarted(true)
+      let i = 0
+      const speed = 18 // ms per character — fast enough to feel live, slow enough to read
+
+      const tick = () => {
+        if (i <= text.length) {
+          setDisplayed(text.slice(0, i))
+          i++
+          frameRef.current = window.setTimeout(tick, speed)
+        }
+      }
+      tick()
+    }, delay)
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      if (frameRef.current) clearTimeout(frameRef.current)
+    }
+  }, [isInView, text, delay, started])
+
+  return (
+    <p className={className}>
+      {displayed}
+      {started && displayed.length < text.length && (
+        <span className="inline-block w-[2px] h-[1em] bg-current align-middle ml-[1px] animate-pulse opacity-70" />
+      )}
+    </p>
+  )
+}
+
 function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-60px' })
@@ -402,7 +447,12 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
             </div>
           </div>
 
-          <p className="text-sm text-text-secondary leading-relaxed">{debate.bull}</p>
+          <TypewriterText
+            text={debate.bull}
+            isInView={isInView}
+            delay={400}
+            className="text-sm text-text-secondary leading-relaxed"
+          />
 
           <div className="mt-4 pt-3 border-t border-border flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3 text-bullish/50" />
@@ -436,7 +486,12 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
             </div>
           </div>
 
-          <p className="text-sm text-text-secondary leading-relaxed">{debate.bear}</p>
+          <TypewriterText
+            text={debate.bear}
+            isInView={isInView}
+            delay={800}
+            className="text-sm text-text-secondary leading-relaxed"
+          />
 
           <div className="mt-4 pt-3 border-t border-border flex items-center gap-1.5">
             <TrendingDown className="w-3 h-3 text-bearish/50" />
@@ -464,7 +519,12 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
               <span className="text-[11px] font-black text-text-primary uppercase tracking-[0.14em]">Judge Verdict</span>
               <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-bg-card border border-border text-text-muted rounded tracking-wide uppercase">AI Impartial</span>
             </div>
-            <p className="text-sm text-text-secondary leading-relaxed">{debate.judge}</p>
+            <TypewriterText
+              text={debate.judge}
+              isInView={isInView}
+              delay={1400}
+              className="text-sm text-text-secondary leading-relaxed"
+            />
           </div>
         </div>
       </motion.div>
