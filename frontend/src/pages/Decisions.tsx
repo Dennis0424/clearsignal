@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
-import { BookOpen, Brain, Sparkles } from 'lucide-react'
-import { motion } from 'motion/react'
+import { useState, useEffect, useRef } from 'react'
+import { BookOpen, Brain, Sparkles, Flame } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { getDecisions, getAutopsy } from '../api'
 import type { Decision, AutopsyStats } from '../types'
 
@@ -17,6 +17,145 @@ const containerVariants = {
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
+}
+
+// ── Decision Roast panel ───────────────────────────────────────
+function RoastPanel({ hasDecisions }: { hasDecisions: boolean }) {
+  const [state, setState] = useState<'idle' | 'loading' | 'revealed'>('idle')
+  const [roast, setRoast] = useState('')
+  const [displayed, setDisplayed] = useState('')
+  const frameRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  async function handleRoast() {
+    if (!hasDecisions) return
+    setState('loading')
+    try {
+      const res = await fetch('/roast')
+      const data = await res.json()
+      setRoast(data.roast || 'The market already roasted you enough.')
+      setState('revealed')
+    } catch {
+      setRoast('The market already roasted you enough. My work here is done.')
+      setState('revealed')
+    }
+  }
+
+  // Typewriter effect for roast text
+  useEffect(() => {
+    if (state !== 'revealed' || !roast) return
+    setDisplayed('')
+    let i = 0
+    const tick = () => {
+      if (i <= roast.length) {
+        setDisplayed(roast.slice(0, i))
+        i++
+        frameRef.current = setTimeout(tick, 22)
+      }
+    }
+    tick()
+    return () => { if (frameRef.current) clearTimeout(frameRef.current) }
+  }, [state, roast])
+
+  return (
+    <motion.div
+      className="bg-bg-card border border-border rounded-xl p-6 mb-6"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 80, damping: 18, delay: 0.15 }}
+    >
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-bg-elevated border border-border flex items-center justify-center">
+            <Flame className="w-4 h-4 text-bearish" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-text-primary">Decision Roast</div>
+            <div className="text-[11px] text-text-muted">AI reads your trades. Brutally.</div>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {state === 'idle' && (
+            <motion.button
+              key="idle-btn"
+              onClick={handleRoast}
+              disabled={!hasDecisions}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              whileHover={hasDecisions ? { scale: 1.03 } : {}}
+              whileTap={hasDecisions ? { scale: 0.97 } : {}}
+              className="px-4 py-2 rounded-lg bg-accent text-bg-deep text-xs font-bold uppercase tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Roast Me
+            </motion.button>
+          )}
+          {state === 'loading' && (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-2"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-bearish animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-bearish animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-bearish animate-bounce" style={{ animationDelay: '300ms' }} />
+            </motion.div>
+          )}
+          {state === 'revealed' && (
+            <motion.button
+              key="again-btn"
+              onClick={() => { setState('idle'); setRoast(''); setDisplayed('') }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-[11px] font-mono text-text-muted hover:text-text-secondary transition-colors"
+            >
+              Reset
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Roast reveal area */}
+      <AnimatePresence>
+        {state === 'revealed' && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-[1px] flex-1 bg-bearish/20" />
+                <span className="text-[10px] font-mono text-bearish/60 uppercase tracking-[0.16em]">AI Verdict</span>
+                <div className="h-[1px] flex-1 bg-bearish/20" />
+              </div>
+              <p className="text-sm text-text-secondary leading-relaxed font-mono">
+                {displayed}
+                {displayed.length < roast.length && (
+                  <span className="inline-block w-[2px] h-[1em] bg-bearish align-middle ml-[1px] animate-pulse" />
+                )}
+              </p>
+            </div>
+          </motion.div>
+        )}
+        {state === 'idle' && !hasDecisions && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-text-muted"
+          >
+            Make some trades first. Give the AI something to work with.
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
 }
 
 export default function Decisions() {
@@ -74,6 +213,8 @@ export default function Decisions() {
           )}
         </>
       )}
+
+      <RoastPanel hasDecisions={decisions.length > 0} />
 
       {/* Decision Journal */}
       <motion.div className="bg-bg-card border border-border rounded-xl p-6" variants={itemVariants} initial="hidden" animate="visible">
