@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'motion/react'
+import SignalMark from '../components/SignalMark'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -428,10 +429,10 @@ export default function Landing() {
             initial="hidden"
             animate="visible"
           >
-            <motion.div
-              variants={heroItem}
-              className="h-[1px] w-16 bg-accent mb-8"
-            />
+            <motion.div variants={heroItem} className="flex items-center gap-3 mb-8">
+              <SignalMark size={28} className="text-accent" animate={true} />
+              <div className="h-[1px] w-12 bg-accent/40" />
+            </motion.div>
             <motion.h1
               variants={heroItem}
               className="text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-text-primary leading-[1.08] tracking-tighter mb-4"
