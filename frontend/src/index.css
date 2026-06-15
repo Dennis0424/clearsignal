@@ -1,40 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Core palette — Modern Dark Cinema + Gold/Purple fintech */
-  --color-bg-deep: #020617;
-  --color-bg-base: #0a0f1e;
-  --color-bg-elevated: #111827;
-  --color-bg-card: #1a2235;
+  /* Palette - Dark tech, single emerald accent */
+  --color-bg-deep: #09090b;
+  --color-bg-base: #0c0c0f;
+  --color-bg-elevated: #141418;
+  --color-bg-card: #18181b;
 
-  /* Surfaces with glass effect */
+  /* Surfaces */
   --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-light: rgba(255, 255, 255, 0.06);
-  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-surface-light: rgba(255, 255, 255, 0.05);
+  --color-surface-hover: rgba(255, 255, 255, 0.07);
 
-  /* Text */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #8a94a6;
-  --color-text-muted: #4b5563;
+  /* Text - higher contrast */
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #52525b;
 
-  /* Accents */
+  /* Single accent - emerald (trust, finance, growth) */
+  --color-accent: #10b981;
+  --color-accent-light: #34d399;
+  --color-accent-dim: rgba(16, 185, 129, 0.12);
+
+  /* Warm secondary for highlights only */
   --color-gold: #f59e0b;
   --color-gold-light: #fbbf24;
+
+  /* Legacy - keep for existing pages */
   --color-purple: #8b5cf6;
   --color-purple-light: #a78bfa;
 
   /* Semantic */
   --color-bullish: #10b981;
   --color-bearish: #ef4444;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-light: rgba(255, 255, 255, 0.12);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-light: rgba(255, 255, 255, 0.1);
 
-  /* Legacy compat */
-  --color-primary: #8b5cf6;
-  --color-primary-light: #a78bfa;
-  --color-accent: #f59e0b;
+  /* Compat aliases */
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
 }
 
 body {
@@ -52,34 +59,33 @@ body {
   flex-direction: column;
 }
 
-/* Glassmorphism card base */
+/* Card - simple, no glass gimmick */
 .glass-card {
-  background: linear-gradient(135deg, rgba(26, 34, 53, 0.8), rgba(17, 24, 39, 0.6));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }
 
 .glass-card-hover:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(26, 34, 53, 0.9), rgba(17, 24, 39, 0.7));
+  border-color: var(--color-border-light);
+  background: var(--color-bg-elevated);
 }
 
-/* Glow effects */
+/* Glow effects - toned down */
 .glow-gold {
-  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1), 0 0 60px rgba(245, 158, 11, 0.05);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.08);
 }
 
 .glow-purple {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1), 0 0 60px rgba(139, 92, 246, 0.05);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.08);
 }
 
 .glow-bullish {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1), 0 0 60px rgba(16, 185, 129, 0.05);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.08);
 }
 
 .glow-bearish {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1), 0 0 60px rgba(239, 68, 68, 0.05);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.08);
 }
 
 /* Shimmer animation for loading */
@@ -89,24 +95,16 @@ body {
 }
 
 .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-}
-
-/* Subtle gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Scroll reveal */
 .reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .reveal.visible {
@@ -114,39 +112,32 @@ body {
   transform: translateY(0);
 }
 
-/* Staggered children */
 .reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
-.reveal-stagger > .reveal:nth-child(2) { transition-delay: 100ms; }
-.reveal-stagger > .reveal:nth-child(3) { transition-delay: 200ms; }
-.reveal-stagger > .reveal:nth-child(4) { transition-delay: 300ms; }
+.reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
+.reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
+.reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
 
-/* Float animation for orbs */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-float-delay {
-  animation: float 8s ease-in-out infinite;
-  animation-delay: -3s;
-}
-
-/* Hero text stagger fade-in */
+/* Hero entrance */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.hero-animate > *:nth-child(1) { animation: fadeInUp 0.6s ease forwards; animation-delay: 0.1s; opacity: 0; }
-.hero-animate > *:nth-child(2) { animation: fadeInUp 0.6s ease forwards; animation-delay: 0.3s; opacity: 0; }
-.hero-animate > *:nth-child(3) { animation: fadeInUp 0.6s ease forwards; animation-delay: 0.5s; opacity: 0; }
-.hero-animate > *:nth-child(4) { animation: fadeInUp 0.6s ease forwards; animation-delay: 0.7s; opacity: 0; }
+.hero-animate > *:nth-child(1) { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.1s; opacity: 0; }
+.hero-animate > *:nth-child(2) { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.25s; opacity: 0; }
+.hero-animate > *:nth-child(3) { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.4s; opacity: 0; }
+.hero-animate > *:nth-child(4) { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.55s; opacity: 0; }
+.hero-animate > *:nth-child(5) { animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.7s; opacity: 0; }
 
-/* CTA pulse glow */
-.cta-glow:hover {
-  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(245, 158, 11, 0.15);
+/* Subtle line animation */
+@keyframes lineGrow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.line-grow {
+  transform-origin: left;
+  animation: lineGrow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.6s;
+  transform: scaleX(0);
 }

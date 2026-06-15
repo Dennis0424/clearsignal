@@ -21,6 +21,9 @@ export default defineConfig({
       '/decision': 'http://localhost:8000',
       '/decisions': 'http://localhost:8000',
       '/autopsy': 'http://localhost:8000',
+      '/cooldown': 'http://localhost:8000',
+      '/roast': 'http://localhost:8000',
+      '/degen-score': 'http://localhost:8000',
     },
   },
 })
