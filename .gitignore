@@ -9,3 +9,11 @@ claude.md
 *.db
 node_modules/
 dist/
+
+# Tooling / session artifacts
+.agents/
+.playwright-mcp/
+.superpowers/
+skills-lock.json
+image.png
+*.png

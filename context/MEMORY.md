@@ -30,6 +30,8 @@
 
 ## Pending Decisions
 
-- Bitget MCP ticker coverage — need to verify during Plan 2
-- ChatGPT comparison: cache responses vs live call (cache safer for demo)
-- Replay mode: does Bitget provide historical snapshots?
+- UI Restructure needed: landing page, portfolio page, remove empty pages (Replay, Head-to-Head)
+- New routes: / (landing), /research (Deep Dive), /portfolio (wallet+Bitget), /decisions (journal+autopsy)
+- Wallet Connect (MetaMask/WalletConnect) + Bitget API key login — both real, not faked
+- Portfolio page: on-chain wallet balance + Bitget spot holdings + P&L + margin
+- Landing page: hero, feature highlights (FOMO protection, AI debate, multi-agent research)
