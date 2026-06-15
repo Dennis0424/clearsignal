@@ -6,6 +6,99 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ─── Particle canvas background ─── */
+function ParticleCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let animId: number
+    let w = canvas.offsetWidth
+    let h = canvas.offsetHeight
+    canvas.width = w
+    canvas.height = h
+
+    const COUNT = Math.floor((w * h) / 18000)
+    const CONNECT_DIST = 140
+    const COLOR = '16, 185, 129' // emerald RGB
+
+    type Particle = { x: number; y: number; vx: number; vy: number; r: number }
+
+    const particles: Particle[] = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.35,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: Math.random() * 1.2 + 0.6,
+    }))
+
+    function draw() {
+      ctx!.clearRect(0, 0, w, h)
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < CONNECT_DIST) {
+            const alpha = (1 - dist / CONNECT_DIST) * 0.15
+            ctx!.beginPath()
+            ctx!.strokeStyle = `rgba(${COLOR}, ${alpha})`
+            ctx!.lineWidth = 0.5
+            ctx!.moveTo(particles[i].x, particles[i].y)
+            ctx!.lineTo(particles[j].x, particles[j].y)
+            ctx!.stroke()
+          }
+        }
+      }
+
+      // Draw dots
+      for (const p of particles) {
+        ctx!.beginPath()
+        ctx!.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx!.fillStyle = `rgba(${COLOR}, 0.35)`
+        ctx!.fill()
+
+        // Move
+        p.x += p.vx
+        p.y += p.vy
+        if (p.x < 0 || p.x > w) p.vx *= -1
+        if (p.y < 0 || p.y > h) p.vy *= -1
+      }
+
+      animId = requestAnimationFrame(draw)
+    }
+
+    draw()
+
+    const handleResize = () => {
+      w = canvas.offsetWidth
+      h = canvas.offsetHeight
+      canvas.width = w
+      canvas.height = h
+    }
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ opacity: 0.6 }}
+    />
+  )
+}
+
 /* ─── Scroll Progress Bar ─── */
 function ScrollProgressBar() {
   const { scrollYProgress } = useScroll()
@@ -173,7 +266,8 @@ export default function Landing() {
       <ScrollProgressBar />
 
       {/* Hero - left-aligned, asymmetric */}
-      <section ref={heroRef} className="min-h-[100dvh] flex items-center px-6 md:px-12 relative">
+      <section ref={heroRef} className="min-h-[100dvh] flex items-center px-6 md:px-12 relative overflow-hidden">
+        <ParticleCanvas />
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1fr_0.8fr] gap-16 items-center">
           <motion.div
             variants={heroContainer}
