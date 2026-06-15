@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { motion, useInView } from 'motion/react'
-import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain, Swords } from 'lucide-react'
+import { motion, AnimatePresence, useInView } from 'motion/react'
+import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain, Swords, Activity } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -13,6 +13,184 @@ const pageVariants = {
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } },
+}
+
+// ── Cooldown timer state and hook ──────────────────────────────
+type CooldownData = {
+  active: boolean
+  seconds_remaining: number
+  minutes_remaining: number
+  last_loss_pct: number | null
+  last_loss_ticker: string | null
+  message: string
+}
+
+function useCooldown() {
+  const [cooldown, setCooldown] = useState<CooldownData | null>(null)
+  const [tick, setTick] = useState(0)
+
+  useEffect(() => {
+    fetch('/cooldown')
+      .then(r => r.json())
+      .then(setCooldown)
+      .catch(() => setCooldown(null))
+  }, [tick])
+
+  // Refresh every 30s
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 30000)
+    return () => clearInterval(id)
+  }, [])
+
+  return cooldown
+}
+
+function CooldownBanner({ cooldown }: { cooldown: CooldownData }) {
+  const [secs, setSecs] = useState(cooldown.seconds_remaining)
+
+  useEffect(() => {
+    setSecs(cooldown.seconds_remaining)
+    const id = setInterval(() => setSecs(s => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(id)
+  }, [cooldown.seconds_remaining])
+
+  const mins = Math.floor(secs / 60)
+  const seconds = secs % 60
+  const pct = cooldown.seconds_remaining > 0
+    ? (secs / cooldown.seconds_remaining) * 100
+    : 0
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      className="rounded-xl border border-bearish/30 bg-bearish/5 p-4 mb-4"
+    >
+      {/* Header row */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-bearish animate-pulse" />
+          <span className="text-[11px] font-mono font-bold text-bearish uppercase tracking-[0.14em]">
+            Cooldown Active
+          </span>
+        </div>
+        {cooldown.last_loss_ticker && cooldown.last_loss_pct != null && (
+          <span className="text-[10px] font-mono text-text-muted">
+            Last: {cooldown.last_loss_ticker} {cooldown.last_loss_pct.toFixed(1)}%
+          </span>
+        )}
+      </div>
+
+      {/* Countdown display */}
+      <div className="flex items-baseline gap-1 mb-3">
+        <span className="text-3xl font-black font-mono text-bearish tabular-nums">
+          {String(mins).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+        </span>
+        <span className="text-xs font-mono text-text-muted ml-1">remaining</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full h-[3px] bg-bearish/20 rounded-full overflow-hidden mb-3">
+        <motion.div
+          className="h-full bg-bearish rounded-full"
+          initial={{ width: '100%' }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: 'linear' }}
+        />
+      </div>
+
+      <p className="text-xs text-text-muted leading-relaxed">{cooldown.message}</p>
+    </motion.div>
+  )
+}
+
+// ── Degen Score Widget ─────────────────────────────────────────
+type DegenData = {
+  score: number
+  level: 'zen' | 'spicy' | 'degen'
+  factors: Array<{ label: string; value: string; points: number }>
+  message: string
+}
+
+function DegenScoreWidget() {
+  const [data, setData] = useState<DegenData | null>(null)
+
+  useEffect(() => {
+    fetch('/degen-score')
+      .then(r => r.json())
+      .then(setData)
+      .catch(() => null)
+  }, [])
+
+  if (!data) return null
+
+  const colorMap = {
+    zen: { text: 'text-accent', bar: 'bg-accent', border: 'border-accent/20', bg: 'bg-accent/5' },
+    spicy: { text: 'text-gold', bar: 'bg-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
+    degen: { text: 'text-bearish', bar: 'bg-bearish', border: 'border-bearish/20', bg: 'bg-bearish/5' },
+  }
+  const c = colorMap[data.level]
+  const levelLabel = { zen: 'ZEN', spicy: 'SPICY', degen: 'DEGEN' }[data.level]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 80, damping: 18, delay: 0.2 }}
+      className={`rounded-xl border ${c.border} ${c.bg} p-4 mb-4`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-text-muted" />
+          <span className="text-[11px] font-mono font-semibold text-text-muted uppercase tracking-[0.14em]">
+            Degen Score
+          </span>
+        </div>
+        <span className={`text-[10px] font-mono font-bold ${c.text} uppercase tracking-wide`}>
+          {levelLabel}
+        </span>
+      </div>
+
+      {/* Score + bar */}
+      <div className="flex items-baseline gap-2 mb-2">
+        <motion.span
+          className={`text-3xl font-black font-mono ${c.text} tabular-nums`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {data.score}
+        </motion.span>
+        <span className="text-xs font-mono text-text-muted">/ 100</span>
+      </div>
+
+      <div className="w-full h-[3px] bg-bg-elevated rounded-full overflow-hidden mb-3">
+        <motion.div
+          className={`h-full ${c.bar} rounded-full`}
+          initial={{ width: 0 }}
+          animate={{ width: `${data.score}%` }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+        />
+      </div>
+
+      {/* Factors */}
+      {data.factors.length > 0 && (
+        <div className="space-y-1 mb-3">
+          {data.factors.map((f, i) => (
+            <div key={i} className="flex items-center justify-between text-[10px] font-mono">
+              <span className="text-text-muted">{f.label}</span>
+              <span className={c.text}>{f.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[11px] text-text-muted leading-relaxed">{data.message}</p>
+    </motion.div>
+  )
 }
 
 export default function DeepDive() {
@@ -129,6 +307,7 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
 
   return (
     <div className="space-y-6">
+      <DegenScoreWidget />
       {chartData.length > 0 && <PriceChart data={chartData} ticker={ticker} />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FinancialsCard data={financials} />
@@ -542,6 +721,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
   const [confidence, setConfidence] = useState(5)
   const [horizon, setHorizon] = useState('1w')
   const [tradeResult, setTradeResult] = useState<TradeResponse | null>(null)
+  const cooldown = useCooldown()
 
   const symbol = `${ticker}USDT`
 
@@ -604,6 +784,9 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
               <span className="text-sm font-semibold text-gold tabular-nums">${(Number(quantity) * price).toFixed(2)}</span>
             </div>
           )}
+          <AnimatePresence>
+            {cooldown?.active && <CooldownBanner cooldown={cooldown} />}
+          </AnimatePresence>
           <button onClick={handleFomoCheck} disabled={loading || !quantity}
             className="w-full px-4 py-2.5 bg-accent text-bg-deep rounded-xl text-sm font-medium hover:bg-accent-light transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
             <Shield className="w-4 h-4" /> {loading ? 'Checking...' : 'Check & Trade'}
@@ -677,6 +860,9 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
               </select>
             </div>
           </div>
+          <AnimatePresence>
+            {cooldown?.active && <CooldownBanner cooldown={cooldown} />}
+          </AnimatePresence>
           <button onClick={handleExecute} disabled={loading || !reasoning.trim()}
             className="w-full px-4 py-2.5 bg-gradient-to-r from-bullish to-emerald-400 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
             <ShoppingCart className="w-4 h-4" /> {loading ? 'Executing...' : 'Record & Execute Trade'}
