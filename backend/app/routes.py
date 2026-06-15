@@ -255,3 +255,189 @@ async def get_portfolio_assets():
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(None, get_account_assets)
     return data
+
+
+@router.get("/cooldown")
+async def get_cooldown():
+    """Return whether a cooldown is active based on the trader's last losing trade."""
+    from datetime import datetime, timezone
+
+    decisions = db.get_decisions(limit=10)
+
+    last_loss = None
+    for d in decisions:
+        if d["outcome_pct"] is not None and d["outcome_pct"] < 0:
+            last_loss = d
+            break
+
+    if last_loss is None:
+        return {
+            "active": False,
+            "seconds_remaining": 0,
+            "minutes_remaining": 0.0,
+            "last_loss_pct": None,
+            "last_loss_ticker": None,
+            "message": "All clear. But are you sure?",
+        }
+
+    loss_pct = abs(last_loss["outcome_pct"])
+    cooldown_duration = min(loss_pct * 30 * 60, 14400)
+
+    now = datetime.now(timezone.utc)
+    ts = datetime.fromisoformat(last_loss["created_at"].replace("Z", "+00:00"))
+    elapsed = (now - ts).total_seconds()
+    seconds_remaining = max(0, cooldown_duration - elapsed)
+
+    if seconds_remaining <= 0:
+        return {
+            "active": False,
+            "seconds_remaining": 0,
+            "minutes_remaining": 0.0,
+            "last_loss_pct": last_loss["outcome_pct"],
+            "last_loss_ticker": last_loss["ticker"],
+            "message": "All clear. But are you sure?",
+        }
+
+    if loss_pct < 5:
+        message = "Small cut. Still, let it breathe."
+    elif loss_pct < 15:
+        message = "That one stung. Step away from the keyboard."
+    else:
+        message = "Put the phone down. Walk outside. Touch grass."
+
+    return {
+        "active": True,
+        "seconds_remaining": int(seconds_remaining),
+        "minutes_remaining": round(seconds_remaining / 60, 1),
+        "last_loss_pct": last_loss["outcome_pct"],
+        "last_loss_ticker": last_loss["ticker"],
+        "message": message,
+    }
+
+
+@router.get("/roast")
+async def get_roast():
+    """Claude roasts the trader's decision journal."""
+    decisions = db.get_decisions(limit=15)
+
+    if len(decisions) < 2:
+        return {"roast": "You haven't traded enough to be roasted yet. Give the market more chances to humble you."}
+
+    decisions_text = "\n".join(
+        f"- {d['ticker']} ({d['side']}): confidence {d['confidence']}/10, "
+        f"FOMO={d['fomo_score']}, outcome="
+        + (f"{d['outcome_pct']:+.1f}%" if d["outcome_pct"] is not None else "pending")
+        + f", reasoning: \"{d['reasoning']}\""
+        for d in decisions
+    )
+
+    prompt = f"""You are a brutally honest trading coach who roasts traders' decisions like a stand-up comedian.
+Roast this trader's decision history in 2-3 sentences. Be specific — reference their actual tickers and reasoning.
+Be funny but accurate. No emojis. Point out the exact mistake pattern you see.
+
+Their trades:
+{decisions_text}
+
+Give the roast only. No intro, no "here's your roast". Just the roast itself."""
+
+    try:
+        llm = get_llm_client()
+        roast = await llm.complete(prompt)
+    except Exception:
+        roast = "The market already roasted you enough. My work here is done."
+
+    return {"roast": roast}
+
+
+@router.get("/degen-score")
+async def get_degen_score():
+    """Calculates a 0-100 degen score based on trading behavior."""
+    from datetime import datetime, timezone
+
+    decisions = db.get_decisions(limit=20)
+
+    if not decisions:
+        return {"score": 0, "level": "zen", "factors": [], "message": "No trades yet. Pure potential."}
+
+    score = 0
+    factors = []
+
+    # Factor 1: FOMO trade ratio (max 35 points)
+    fomo_count = sum(1 for d in decisions if d["fomo_score"] in ("HIGH", "MODERATE"))
+    fomo_ratio = fomo_count / len(decisions)
+    fomo_points = int(fomo_ratio * 35)
+    score += fomo_points
+    if fomo_points > 0:
+        factors.append({"label": "FOMO trades", "value": f"{int(fomo_ratio * 100)}%", "points": fomo_points})
+
+    # Factor 2: Overconfidence (avg confidence > 8, max 25 points)
+    avg_conf = sum(d["confidence"] for d in decisions) / len(decisions)
+    if avg_conf >= 9:
+        conf_points = 25
+    elif avg_conf >= 8:
+        conf_points = 15
+    elif avg_conf >= 7:
+        conf_points = 5
+    else:
+        conf_points = 0
+    score += conf_points
+    if conf_points > 0:
+        factors.append({"label": "Overconfidence", "value": f"{avg_conf:.1f}/10 avg", "points": conf_points})
+
+    # Factor 3: Consecutive losses (max 25 points)
+    resolved = [d for d in decisions if d["outcome_pct"] is not None]
+    if resolved:
+        streak = 0
+        for d in resolved:
+            if d["outcome_pct"] < 0:
+                streak += 1
+            else:
+                break
+        if streak >= 3:
+            streak_points = 25
+        elif streak == 2:
+            streak_points = 15
+        elif streak == 1:
+            streak_points = 8
+        else:
+            streak_points = 0
+        score += streak_points
+        if streak_points > 0:
+            factors.append({"label": "Loss streak", "value": f"{streak} in a row", "points": streak_points})
+
+    # Factor 4: Trading frequency (many trades in short time, max 15 points)
+    if len(decisions) >= 5:
+        now = datetime.now(timezone.utc)
+        recent = 0
+        for d in decisions[:10]:
+            try:
+                ts = datetime.fromisoformat(d["created_at"].replace("Z", "+00:00"))
+                if (now - ts).total_seconds() < 86400:
+                    recent += 1
+            except Exception:
+                pass
+        if recent >= 7:
+            freq_points = 15
+        elif recent >= 5:
+            freq_points = 10
+        elif recent >= 3:
+            freq_points = 5
+        else:
+            freq_points = 0
+        score += freq_points
+        if freq_points > 0:
+            factors.append({"label": "Overtrading", "value": f"{recent} trades today", "points": freq_points})
+
+    score = min(score, 100)
+
+    if score >= 70:
+        level = "degen"
+        message = "You are not trading. You are gambling with extra steps."
+    elif score >= 40:
+        level = "spicy"
+        message = "Elevated risk behavior detected. The market is watching."
+    else:
+        level = "zen"
+        message = "Disciplined. Suspicious, even."
+
+    return {"score": score, "level": level, "factors": factors, "message": message}
