@@ -341,6 +341,65 @@ function LoadingState() {
   )
 }
 
+function QuickInsightStrip({ financials, ticker, isCrypto }: { financials: Record<string, string | number>; ticker: string; isCrypto: boolean }) {
+  const current = Number(financials.current_price) || 0
+  const target = Number(financials.target_mean_price) || 0
+  const high52 = Number(financials.fifty_two_week_high) || 0
+  const low52 = Number(financials.fifty_two_week_low) || 0
+  const beta = Number(financials.beta) || 0
+
+  const uptide = target > 0 && current > 0 ? ((target - current) / current) * 100 : null
+  const range52Pct = high52 > low52 ? ((current - low52) / (high52 - low52)) * 100 : null
+  const reco = String(financials.recommendation || '').toLowerCase()
+  const recoColor = reco.includes('buy') || reco.includes('strong_buy') ? 'text-bullish' : reco.includes('sell') ? 'text-bearish' : 'text-gold'
+
+  const items = [
+    uptide != null && !isCrypto && {
+      label: 'Analyst Upside',
+      value: `${uptide >= 0 ? '+' : ''}${uptide.toFixed(1)}%`,
+      sub: `Target $${target.toFixed(0)}`,
+      color: uptide >= 0 ? 'text-bullish' : 'text-bearish',
+    },
+    range52Pct != null && {
+      label: '52W Position',
+      value: `${range52Pct.toFixed(0)}%`,
+      sub: `$${low52.toFixed(0)} — $${high52.toFixed(0)}`,
+      color: range52Pct > 70 ? 'text-bearish' : range52Pct < 30 ? 'text-bullish' : 'text-gold',
+    },
+    beta > 0 && !isCrypto && {
+      label: 'Beta',
+      value: beta.toFixed(2),
+      sub: beta > 1.5 ? 'High volatility' : beta > 1 ? 'Above market' : 'Low vol',
+      color: beta > 1.5 ? 'text-bearish' : 'text-text-secondary',
+    },
+    reco && !isCrypto && {
+      label: 'Consensus',
+      value: String(financials.recommendation || '—').replace('_', ' ').toUpperCase(),
+      sub: `${financials.num_analysts || '?'} analysts`,
+      color: recoColor,
+    },
+  ].filter(Boolean) as Array<{ label: string; value: string; sub: string; color: string }>
+
+  if (items.length === 0) return null
+
+  return (
+    <motion.div
+      className="grid grid-cols-2 md:grid-cols-4 gap-3"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {items.map((item, i) => (
+        <div key={i} className="bg-bg-card border border-border rounded-xl p-4">
+          <div className="text-[10px] text-text-muted uppercase tracking-widest mb-1">{item.label}</div>
+          <div className={`text-xl font-black font-mono tabular-nums ${item.color}`}>{item.value}</div>
+          <div className="text-[10px] text-text-muted mt-0.5">{item.sub}</div>
+        </div>
+      ))}
+    </motion.div>
+  )
+}
+
 function Results({ data, chartData, activeTicker }: { data: DebateResponse; chartData: PricePoint[]; activeTicker: string }) {
   const { financials, social, debate, ticker } = data
   const asset = data.asset
@@ -363,6 +422,9 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
 
   return (
     <div className="space-y-8">
+      {/* ── Quick Insight Strip ── */}
+      <QuickInsightStrip financials={financials} ticker={ticker} isCrypto={isCrypto} />
+
       {/* ── Section 1: Signal Overview (compact horizontal strip) ── */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
         <DegenScoreWidget />

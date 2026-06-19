@@ -177,6 +177,48 @@ const heroItem = {
   },
 }
 
+/* ─── Live platform stats strip ─── */
+function StatsStrip() {
+  const [decisionCount, setDecisionCount] = useState<number | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, amount: 0.2 })
+
+  useEffect(() => {
+    fetch('/decision-log')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setDecisionCount(data.length)
+      })
+      .catch(() => null)
+  }, [])
+
+  const stats = [
+    { label: 'Tickers Supported', value: '15+', sub: 'stocks & crypto' },
+    { label: 'Decisions Logged', value: decisionCount != null ? String(decisionCount) : '—', sub: 'in this session' },
+    { label: 'AI Agents', value: '5', sub: 'per analysis' },
+    { label: 'Behavioral Checks', value: '8', sub: 'FOMO signals' },
+  ]
+
+  return (
+    <div ref={ref} className="border-t border-border px-6 md:px-12 py-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+            transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="text-2xl font-black text-text-primary font-mono tabular-nums">{s.value}</div>
+            <div className="text-xs font-semibold text-text-primary mt-0.5">{s.label}</div>
+            <div className="text-[10px] text-text-muted">{s.sub}</div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 /* ─── Feature card reveal variants ─── */
 const cardVariants = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
@@ -518,6 +560,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Stats strip */}
+      <StatsStrip />
 
       {/* Features - asymmetric bento, NOT 3 equal cards */}
       <section id="features" className="px-6 md:px-12 py-24">
