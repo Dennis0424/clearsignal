@@ -9,6 +9,7 @@ import PositionSizer from '../components/PositionSizer'
 import WhatIfSimulator from '../components/WhatIfSimulator'
 import SpotlightCard from '../components/SpotlightCard'
 import MarketScanner from '../components/MarketScanner'
+import Watchlist, { WatchlistButton } from '../components/Watchlist'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -250,14 +251,17 @@ export default function DeepDive() {
   return (
     <motion.div className="max-w-7xl mx-auto px-6 py-10" variants={pageVariants} initial="hidden" animate="visible">
       <motion.div className="mb-10" variants={itemVariants}>
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
-            <Microscope className="w-5 h-5 text-accent" />
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
+              <Microscope className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-text-primary tracking-tight">Research</h1>
+              <p className="text-text-secondary text-sm">Market scanner + multi-agent deep dive</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-text-primary tracking-tight">Deep Dive</h1>
-            <p className="text-text-secondary text-sm">Multi-agent research + Bull vs Bear debate</p>
-          </div>
+          {activeTicker && <WatchlistButton ticker={activeTicker} />}
         </div>
       </motion.div>
 
@@ -291,14 +295,16 @@ export default function DeepDive() {
       )}
       {data && <Results data={data} chartData={chartData} activeTicker={activeTicker} />}
 
-      {/* Market Scanner — show when no active research */}
+      {/* Market Scanner + Watchlist — show when no active research */}
       {!loading && !data && !error && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5"
         >
           <MarketScanner />
+          <Watchlist />
         </motion.div>
       )}
     </motion.div>
