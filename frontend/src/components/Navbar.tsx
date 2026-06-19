@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Microscope, Wallet, BookOpen } from 'lucide-react'
+import MarketStatus from './MarketStatus'
 
 const links = [
   { to: '/research', label: 'Research', icon: Microscope },
@@ -13,11 +14,16 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-bg-deep/95 backdrop-blur-sm px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 cursor-pointer">
-          <span className="font-semibold text-sm text-text-primary tracking-tight">
-            ClearSignal
-          </span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link to="/" className="flex items-center gap-2 cursor-pointer">
+            <span className="font-semibold text-sm text-text-primary tracking-tight">
+              ClearSignal
+            </span>
+          </Link>
+          <div className="hidden lg:block">
+            <MarketStatus />
+          </div>
+        </div>
         <div className="flex gap-1">
           {links.map(({ to, label, icon: Icon }) => (
             <Link

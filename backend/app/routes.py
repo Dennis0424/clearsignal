@@ -11,6 +11,7 @@ from agents.social_pulse import get_social_pulse, format_social_for_prompt
 from agents.debate import run_debate
 from agents.trader import get_ticker_price, place_spot_order, preview_trade, get_account_assets
 from agents.chart_data import get_price_history, get_analyst_data
+from agents.stock_intel import get_earnings_calendar, get_insider_transactions
 from agents.chat import chat_about_stock
 from agents.fomo_detector import check_fomo_signals, regret_simulation, generate_fomo_warning
 
@@ -441,3 +442,23 @@ async def get_degen_score():
         message = "Disciplined. Suspicious, even."
 
     return {"score": score, "level": level, "factors": factors, "message": message}
+
+
+@router.get("/earnings/{ticker}")
+async def get_earnings(ticker: str):
+    """Get upcoming earnings date and recent earnings history."""
+    import asyncio
+    ticker = ticker.upper()
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_earnings_calendar, ticker)
+    return data
+
+
+@router.get("/insiders/{ticker}")
+async def get_insiders(ticker: str):
+    """Get recent insider transactions (SEC Form 4 data)."""
+    import asyncio
+    ticker = ticker.upper()
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_insider_transactions, ticker)
+    return data

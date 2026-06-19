@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'motion/react'
 import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain, Swords, Activity } from 'lucide-react'
 import FearGreedGauge from '../components/FearGreedGauge'
+import EarningsWidget from '../components/EarningsWidget'
+import InsiderWidget from '../components/InsiderWidget'
+import PositionSizer from '../components/PositionSizer'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -305,6 +308,13 @@ function LoadingState() {
 
 function Results({ data, chartData, activeTicker }: { data: DebateResponse; chartData: PricePoint[]; activeTicker: string }) {
   const { financials, social, debate, ticker } = data
+  const [earnings, setEarnings] = useState<any>(null)
+  const [insiders, setInsiders] = useState<any>(null)
+
+  useEffect(() => {
+    fetch(`/earnings/${ticker}`).then(r => r.json()).then(setEarnings).catch(() => null)
+    fetch(`/insiders/${ticker}`).then(r => r.json()).then(setInsiders).catch(() => null)
+  }, [ticker])
 
   const gaugeSignals = {
     fomo_count: social.reddit.reddit_mentions > 5 ? 2 : social.reddit.reddit_mentions > 2 ? 1 : 0,
@@ -324,9 +334,16 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
         <FinancialsCard data={financials} />
         <SocialCard data={social} />
       </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {earnings && <EarningsWidget data={earnings} />}
+        {insiders && <InsiderWidget data={insiders} />}
+      </div>
       <DebatePanel debate={debate} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} />
+        <div className="space-y-6">
+          <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} />
+          <PositionSizer currentPrice={Number(financials.current_price) || 0} ticker={ticker} />
+        </div>
         <ChatPanel ticker={activeTicker} />
       </div>
     </div>

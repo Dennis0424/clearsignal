@@ -26,6 +26,8 @@ export default defineConfig({
       '/roast': 'http://localhost:8000',
       '/degen-score': 'http://localhost:8000',
       '/portfolio/assets': 'http://localhost:8000',
+      '/earnings': 'http://localhost:8000',
+      '/insiders': 'http://localhost:8000',
     },
   },
 })
