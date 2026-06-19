@@ -56,11 +56,15 @@ class LLMClient:
                 "max_tokens": 512,
                 "messages": [{"role": "user", "content": prompt}],
             }
-        return {
+        payload = {
             "model": self.model,
             "max_tokens": 512,
             "messages": [{"role": "user", "content": prompt}],
         }
+        # Disable chain-of-thought reasoning on Qwen3 thinking models — cuts latency from ~120s to ~3s
+        if self.provider == "qwen":
+            payload["enable_thinking"] = False
+        return payload
 
     async def complete(self, prompt: str) -> str:
         async with httpx.AsyncClient(timeout=120) as client:
