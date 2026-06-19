@@ -24,6 +24,7 @@ export default defineConfig({
       '/cooldown': 'http://localhost:8000',
       '/roast': 'http://localhost:8000',
       '/degen-score': 'http://localhost:8000',
+      '/portfolio': 'http://localhost:8000',
     },
   },
 })

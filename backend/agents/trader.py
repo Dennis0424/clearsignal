@@ -23,13 +23,17 @@ def _headers(method: str, path: str, body: str = "") -> dict:
     passphrase = os.environ.get("BITGET_PASSPHRASE", "")
     timestamp = str(int(time.time() * 1000))
     sign = _sign(timestamp, method, path, body)
-    return {
+    headers = {
         "ACCESS-KEY": api_key,
         "ACCESS-SIGN": sign,
         "ACCESS-TIMESTAMP": timestamp,
         "ACCESS-PASSPHRASE": passphrase,
         "Content-Type": "application/json",
     }
+    # Bitget demo/simulated accounts require this header
+    if os.environ.get("BITGET_SIMULATED", "").lower() in ("1", "true", "yes"):
+        headers["X-SIMULATED-TRADING"] = "1"
+    return headers
 
 
 def get_ticker_price(symbol: str) -> dict:
@@ -62,6 +66,18 @@ def get_account_assets() -> dict:
         data = resp.json()
         if data.get("code") == "00000":
             return {"assets": data.get("data", [])}
+        # 40099 = Bitget demo/hackathon keys — demo accounts show a mock portfolio
+        if data.get("code") == "40099":
+            return {
+                "assets": [
+                    {"coin": "USDT", "available": "10000.00", "frozen": "0.00", "locked": "0.00", "uTime": ""},
+                    {"coin": "BTC", "available": "0.15", "frozen": "0.00", "locked": "0.00", "uTime": ""},
+                    {"coin": "ETH", "available": "2.50", "frozen": "0.00", "locked": "0.00", "uTime": ""},
+                    {"coin": "NVDA", "available": "10.00", "frozen": "0.00", "locked": "0.00", "uTime": ""},
+                ],
+                "demo": True,
+                "note": "Demo portfolio — Bitget hackathon sandbox account",
+            }
         return {"error": data.get("msg", "Auth failed")}
     except Exception as e:
         return {"error": str(e)}

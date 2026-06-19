@@ -177,4 +177,6 @@ export interface PortfolioAsset {
 export interface PortfolioResponse {
   assets?: PortfolioAsset[]
   error?: string
+  demo?: boolean
+  note?: string
 }

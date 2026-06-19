@@ -25,6 +25,7 @@ export default function Portfolio() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showKeyForm, setShowKeyForm] = useState(false)
+  const [isDemo, setIsDemo] = useState(false)
   const [apiKey, setApiKey] = useState('')
   const [secretKey, setSecretKey] = useState('')
   const [passphrase, setPassphrase] = useState('')
@@ -38,6 +39,7 @@ export default function Portfolio() {
         setError(data.error)
       } else {
         setAssets(data.assets || [])
+        setIsDemo(data.demo ?? false)
         setConnected(true)
       }
     } catch (err) {
@@ -140,7 +142,14 @@ export default function Portfolio() {
       {connected && !loading && (
         <div className="bg-bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-base font-semibold text-text-primary">Holdings</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-semibold text-text-primary">Holdings</h2>
+              {isDemo && (
+                <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-gold/10 text-gold border border-gold/20 rounded-md uppercase tracking-wide">
+                  Demo
+                </span>
+              )}
+            </div>
             <span className="text-xs text-text-muted">{nonZeroAssets.length} assets</span>
           </div>
 
