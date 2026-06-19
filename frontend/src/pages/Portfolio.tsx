@@ -108,25 +108,23 @@ export default function Portfolio() {
 
         {/* Bitget API Connect */}
         <motion.div className="bg-bg-card border border-border rounded-xl p-5" variants={itemVariants}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-accent" />
-              <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Bitget API</span>
-            </div>
-            {connected && (
-              <button
-                onClick={handleDisconnect}
-                className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-text-muted hover:text-bearish border border-border hover:border-bearish/30 rounded-lg transition-all cursor-pointer"
-              >
-                <LogOut className="w-3 h-3" />
-                Sign Out
-              </button>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <KeyRound className="w-4 h-4 text-accent" />
+            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Bitget API</span>
           </div>
           {connected ? (
-            <div className="flex items-center gap-2 px-4 py-3 bg-bullish/[0.06] border border-bullish/20 rounded-xl">
-              <CheckCircle className="w-4 h-4 text-bullish" />
-              <span className="text-sm font-medium text-bullish">Connected</span>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-4 py-3 bg-bullish/[0.06] border border-bullish/20 rounded-xl">
+                <CheckCircle className="w-4 h-4 text-bullish" />
+                <span className="text-sm font-medium text-bullish">Connected</span>
+              </div>
+              <button
+                onClick={handleDisconnect}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-border rounded-xl text-sm font-medium text-text-muted hover:text-bearish hover:border-bearish/30 transition-all cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
             </div>
           ) : showKeyForm ? (
             <div className="space-y-2">
