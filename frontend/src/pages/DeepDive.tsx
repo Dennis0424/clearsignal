@@ -5,6 +5,7 @@ import FearGreedGauge from '../components/FearGreedGauge'
 import EarningsWidget from '../components/EarningsWidget'
 import InsiderWidget from '../components/InsiderWidget'
 import PositionSizer from '../components/PositionSizer'
+import SpotlightCard from '../components/SpotlightCard'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -442,7 +443,7 @@ function FinancialsCard({ data }: { data: Record<string, string | number> }) {
   ]
 
   return (
-    <div className="glass-card p-6">
+    <SpotlightCard className="p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
           <BarChart3 className="w-4 h-4 text-gold" />
@@ -484,7 +485,7 @@ function FinancialsCard({ data }: { data: Record<string, string | number> }) {
           <span className="px-2 py-0.5 text-xs font-semibold bg-gold/10 text-gold rounded-md">{String(data.recommendation).toUpperCase()}</span>
         </div>
       )}
-    </div>
+    </SpotlightCard>
   )
 }
 
@@ -492,7 +493,7 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
   const { reddit, news_headlines } = data
 
   return (
-    <div className="glass-card p-6">
+    <SpotlightCard className="p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
           <MessageCircle className="w-4 h-4 text-accent" />
@@ -544,7 +545,7 @@ function SocialCard({ data }: { data: DebateResponse['social'] }) {
           </div>
         </div>
       )}
-    </div>
+    </SpotlightCard>
   )
 }
 
@@ -804,7 +805,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
   const riskColor = fomoData?.risk_level === 'HIGH' ? 'bearish' : fomoData?.risk_level === 'MODERATE' ? 'gold' : 'bullish'
 
   return (
-    <div className="glass-card p-6">
+    <SpotlightCard className="p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-8 h-8 rounded-lg bg-bullish/10 flex items-center justify-center">
           <Shield className="w-4 h-4 text-bullish" />
@@ -931,7 +932,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
             className="w-full px-4 py-2 bg-surface border border-border text-text-primary rounded-xl text-sm font-medium hover:bg-surface-hover transition-all cursor-pointer">New Trade</button>
         </div>
       )}
-    </div>
+    </SpotlightCard>
   )
 }
 
