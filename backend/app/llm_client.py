@@ -66,19 +66,32 @@ class LLMClient:
             payload["enable_thinking"] = False
         return payload
 
-    async def complete(self, prompt: str) -> str:
-        async with httpx.AsyncClient(timeout=120) as client:
-            resp = await client.post(
-                self._endpoint(),
-                headers=self._headers(),
-                json=self._payload(prompt),
-            )
-            resp.raise_for_status()
-            data = resp.json()
+    async def complete(self, prompt: str, retries: int = 2) -> str:
+        last_err = None
+        for attempt in range(retries + 1):
+            try:
+                async with httpx.AsyncClient(timeout=60) as client:
+                    resp = await client.post(
+                        self._endpoint(),
+                        headers=self._headers(),
+                        json=self._payload(prompt),
+                    )
+                    resp.raise_for_status()
+                    data = resp.json()
 
-        if self.provider == "claude":
-            return data["content"][0]["text"]
-        return data["choices"][0]["message"]["content"]
+                if self.provider == "claude":
+                    return data["content"][0]["text"]
+                return data["choices"][0]["message"]["content"]
+            except (httpx.ConnectError, httpx.ReadTimeout, httpx.ConnectTimeout) as e:
+                last_err = e
+                if attempt < retries:
+                    import asyncio
+                    await asyncio.sleep(1)
+                    continue
+                raise
+            except Exception:
+                raise
+        raise last_err  # type: ignore
 
 
 def get_llm_client() -> LLMClient:
