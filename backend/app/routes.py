@@ -11,7 +11,7 @@ from agents.social_pulse import get_social_pulse, format_social_for_prompt
 from agents.debate import run_debate
 from agents.trader import get_ticker_price, place_spot_order, preview_trade, get_account_assets
 from agents.chart_data import get_price_history, get_analyst_data
-from agents.stock_intel import get_earnings_calendar, get_insider_transactions
+from agents.stock_intel import get_earnings_calendar, get_insider_transactions, get_whatif_simulation, get_portfolio_correlation
 from agents.ticker_utils import asset_info, yfinance_symbol, is_crypto
 from agents.chat import chat_about_stock
 from agents.fomo_detector import check_fomo_signals, regret_simulation, generate_fomo_warning
@@ -465,4 +465,25 @@ async def get_insiders(ticker: str):
     ticker = ticker.upper()
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(None, get_insider_transactions, ticker)
+    return data
+
+
+@router.get("/whatif")
+async def whatif_simulation(ticker: str, amount: float = 1000, days_ago: int = 30):
+    """What-if time machine: simulate past investment returns."""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_whatif_simulation, ticker, amount, days_ago)
+    return data
+
+
+@router.get("/correlation")
+async def portfolio_correlation(tickers: str):
+    """Calculate correlation matrix between tickers (comma-separated)."""
+    import asyncio
+    ticker_list = [t.strip() for t in tickers.split(",") if t.strip()]
+    if len(ticker_list) < 2:
+        return {"error": "Need at least 2 tickers"}
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_portfolio_correlation, ticker_list)
     return data

@@ -58,6 +58,79 @@ def get_earnings_calendar(ticker: str) -> dict:
     return result
 
 
+def get_whatif_simulation(ticker: str, amount: float, days_ago: int) -> dict:
+    """Simulate 'what if I invested X in Y, Z days ago' using real historical data."""
+    from datetime import datetime, timedelta
+    session = CurlSession(impersonate="chrome")
+
+    # Determine yfinance symbol
+    from agents.ticker_utils import yfinance_symbol
+    yf_sym = yfinance_symbol(ticker)
+
+    stock = yf.Ticker(yf_sym, session=session)
+    end = datetime.now()
+    start = end - timedelta(days=days_ago + 5)
+
+    hist = stock.history(start=start.strftime('%Y-%m-%d'), end=end.strftime('%Y-%m-%d'))
+    if hist.empty:
+        return {"error": "No historical data available"}
+
+    prices = hist['Close'].tolist()
+    dates = [d.strftime('%Y-%m-%d') for d in hist.index]
+
+    if len(prices) < 2:
+        return {"error": "Not enough data points"}
+
+    start_price = prices[0]
+    end_price = prices[-1]
+    shares = amount / start_price
+    end_value = shares * end_price
+    profit_loss = end_value - amount
+    pct_change = ((end_price - start_price) / start_price) * 100
+
+    chart_data = [{"date": dates[i], "close": round(prices[i], 2)} for i in range(len(prices))]
+
+    return {
+        "ticker": ticker.upper(),
+        "amount_invested": amount,
+        "days_ago": days_ago,
+        "start_price": round(start_price, 2),
+        "end_price": round(end_price, 2),
+        "percent_change": round(pct_change, 2),
+        "profit_loss": round(profit_loss, 2),
+        "end_value": round(end_value, 2),
+        "chart_data": chart_data,
+    }
+
+
+def get_portfolio_correlation(tickers: list[str]) -> dict:
+    """Calculate correlation matrix between multiple tickers."""
+    import numpy as np
+    from agents.ticker_utils import yfinance_symbol
+
+    session = CurlSession(impersonate="chrome")
+    price_data = {}
+
+    for t in tickers[:6]:
+        yf_sym = yfinance_symbol(t)
+        stock = yf.Ticker(yf_sym, session=session)
+        hist = stock.history(period="3mo")
+        if not hist.empty:
+            price_data[t.upper()] = hist['Close'].pct_change().dropna().tolist()
+
+    if len(price_data) < 2:
+        return {"assets": list(price_data.keys()), "matrix": [[1.0]]}
+
+    assets = list(price_data.keys())
+    min_len = min(len(v) for v in price_data.values())
+    returns = np.array([price_data[a][:min_len] for a in assets])
+
+    corr = np.corrcoef(returns)
+    matrix = [[round(float(corr[i][j]), 3) for j in range(len(assets))] for i in range(len(assets))]
+
+    return {"assets": assets, "matrix": matrix}
+
+
 def get_insider_transactions(ticker: str) -> dict:
     """Get recent insider buy/sell transactions from yfinance (SEC Form 4)."""
     session = CurlSession(impersonate="chrome")

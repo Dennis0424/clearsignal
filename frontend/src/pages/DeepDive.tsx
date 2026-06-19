@@ -5,6 +5,7 @@ import FearGreedGauge from '../components/FearGreedGauge'
 import EarningsWidget from '../components/EarningsWidget'
 import InsiderWidget from '../components/InsiderWidget'
 import PositionSizer from '../components/PositionSizer'
+import WhatIfSimulator from '../components/WhatIfSimulator'
 import SpotlightCard from '../components/SpotlightCard'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
@@ -355,7 +356,10 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
       {/* ── Section 4: Multi-Agent Debate ── */}
       <DebatePanel debate={debate} />
 
-      {/* ── Section 5: Action (Trade + Size + Chat) ── */}
+      {/* ── Section 5: What-If Time Machine ── */}
+      <WhatIfSimulator defaultTicker={ticker} />
+
+      {/* ── Section 6: Action (Trade + Size + Chat) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5">
         <div className="space-y-5">
           <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} asset={asset} />

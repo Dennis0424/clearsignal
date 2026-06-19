@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Wallet, Link2, KeyRound, AlertTriangle, CheckCircle, LogOut } from 'lucide-react'
 import { motion } from 'motion/react'
 import { getPortfolioAssets } from '../api'
+import CorrelationMatrix from '../components/CorrelationMatrix'
 import type { PortfolioAsset } from '../types'
 
 const pageVariants = {
@@ -209,6 +210,11 @@ export default function Portfolio() {
         </div>
       )}
 
+      {/* Correlation Matrix — shows when connected with 2+ assets */}
+      {connected && !loading && nonZeroAssets.length >= 2 && (
+        <CorrelationWidget assets={nonZeroAssets} />
+      )}
+
       {/* Empty state when not connected */}
       {!connected && !loading && !error && (
         <motion.div className="bg-bg-card border border-border rounded-xl p-12 text-center" variants={itemVariants} initial="hidden" animate="visible">
@@ -219,4 +225,21 @@ export default function Portfolio() {
       )}
     </motion.div>
   )
+}
+
+function CorrelationWidget({ assets }: { assets: PortfolioAsset[] }) {
+  const [data, setData] = useState<{ assets: string[]; matrix: number[][] } | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const tickers = assets.map(a => a.coin).filter(c => c !== 'USDT').join(',')
+    if (!tickers || tickers.split(',').length < 2) { setLoading(false); return }
+    fetch(`/correlation?tickers=${tickers}`)
+      .then(r => r.json())
+      .then(setData)
+      .catch(() => null)
+      .finally(() => setLoading(false))
+  }, [assets])
+
+  return <div className="mt-6"><CorrelationMatrix data={data} loading={loading} /></div>
 }

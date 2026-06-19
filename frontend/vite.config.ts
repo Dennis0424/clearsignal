@@ -28,6 +28,8 @@ export default defineConfig({
       '/portfolio/assets': 'http://localhost:8000',
       '/earnings': 'http://localhost:8000',
       '/insiders': 'http://localhost:8000',
+      '/whatif': 'http://localhost:8000',
+      '/correlation': 'http://localhost:8000',
     },
   },
 })
