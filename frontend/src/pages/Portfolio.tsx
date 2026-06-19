@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Wallet, Link2, KeyRound, AlertTriangle, CheckCircle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Wallet, Link2, KeyRound, AlertTriangle, CheckCircle, LogOut } from 'lucide-react'
 import { motion } from 'motion/react'
 import { getPortfolioAssets } from '../api'
 import type { PortfolioAsset } from '../types'
@@ -30,6 +30,14 @@ export default function Portfolio() {
   const [secretKey, setSecretKey] = useState('')
   const [passphrase, setPassphrase] = useState('')
 
+  // Restore connection on mount if keys exist in localStorage
+  useEffect(() => {
+    const savedKey = localStorage.getItem('bitget_api_key')
+    if (savedKey) {
+      handleConnect()
+    }
+  }, [])
+
   async function handleConnect() {
     setLoading(true)
     setError(null)
@@ -58,6 +66,19 @@ export default function Portfolio() {
     handleConnect()
   }
 
+  function handleDisconnect() {
+    localStorage.removeItem('bitget_api_key')
+    localStorage.removeItem('bitget_secret_key')
+    localStorage.removeItem('bitget_passphrase')
+    setConnected(false)
+    setAssets([])
+    setIsDemo(false)
+    setApiKey('')
+    setSecretKey('')
+    setPassphrase('')
+    setShowKeyForm(false)
+  }
+
   const nonZeroAssets = assets.filter(a => parseFloat(a.available) > 0 || parseFloat(a.frozen) > 0)
 
   return (
@@ -82,14 +103,25 @@ export default function Portfolio() {
           <button className="w-full px-4 py-3 border border-accent/30 rounded-xl text-sm font-medium text-accent hover:bg-accent/5 transition-all cursor-pointer">
             Connect MetaMask
           </button>
-          <p className="text-[10px] text-text-muted mt-2 text-center">Coming soon — wagmi integration</p>
+          <p className="text-[10px] text-text-muted mt-2 text-center">Coming soon</p>
         </motion.div>
 
         {/* Bitget API Connect */}
         <motion.div className="bg-bg-card border border-border rounded-xl p-5" variants={itemVariants}>
-          <div className="flex items-center gap-2 mb-3">
-            <KeyRound className="w-4 h-4 text-accent" />
-            <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Bitget API</span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-accent" />
+              <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">Bitget API</span>
+            </div>
+            {connected && (
+              <button
+                onClick={handleDisconnect}
+                className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-text-muted hover:text-bearish border border-border hover:border-bearish/30 rounded-lg transition-all cursor-pointer"
+              >
+                <LogOut className="w-3 h-3" />
+                Sign Out
+              </button>
+            )}
           </div>
           {connected ? (
             <div className="flex items-center gap-2 px-4 py-3 bg-bullish/[0.06] border border-bullish/20 rounded-xl">

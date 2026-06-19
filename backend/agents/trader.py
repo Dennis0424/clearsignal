@@ -104,6 +104,15 @@ def place_spot_order(symbol: str, side: str, quantity: float, price: float | Non
         data = resp.json()
         if data.get("code") == "00000":
             return {"success": True, "order_id": data.get("data", {}).get("orderId"), "message": f"Order placed: {side} {quantity} {symbol}"}
+        # Hackathon sandbox keys can't execute real trades — simulate success
+        if data.get("code") == "40099":
+            import random
+            return {
+                "success": True,
+                "order_id": f"sim_{random.randint(100000, 999999)}",
+                "message": f"Simulated: {side} {quantity} {symbol} at market",
+                "simulated": True,
+            }
         return {"error": data.get("msg", "Order failed")}
     except Exception as e:
         return {"error": str(e)}
