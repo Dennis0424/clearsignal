@@ -12,6 +12,7 @@ from agents.debate import run_debate
 from agents.trader import get_ticker_price, place_spot_order, preview_trade, get_account_assets
 from agents.chart_data import get_price_history, get_analyst_data
 from agents.stock_intel import get_earnings_calendar, get_insider_transactions
+from agents.ticker_utils import asset_info, yfinance_symbol, is_crypto
 from agents.chat import chat_about_stock
 from agents.fomo_detector import check_fomo_signals, regret_simulation, generate_fomo_warning
 
@@ -106,11 +107,12 @@ async def debate_ticker(ticker: str):
     """Run full pipeline: research (parallel) + Bull/Bear/Judge debate."""
     import asyncio
     ticker = ticker.upper()
+    yf_symbol = yfinance_symbol(ticker)
 
     loop = asyncio.get_event_loop()
     financials, social = await asyncio.gather(
-        loop.run_in_executor(None, get_financials, ticker),
-        loop.run_in_executor(None, get_social_pulse, ticker),
+        loop.run_in_executor(None, get_financials, yf_symbol),
+        loop.run_in_executor(None, get_social_pulse, yf_symbol),
     )
 
     context = format_financials_for_prompt(financials) + "\n\n" + format_social_for_prompt(social)
@@ -121,6 +123,7 @@ async def debate_ticker(ticker: str):
         "financials": financials,
         "social": social,
         "debate": debate_result,
+        "asset": asset_info(ticker),
     }
 
 
@@ -153,8 +156,9 @@ async def get_chart_data(ticker: str, period: str = "3mo"):
     """Get historical price data for charting."""
     import asyncio
     ticker = ticker.upper()
+    yf_sym = yfinance_symbol(ticker)
     loop = asyncio.get_event_loop()
-    data = await loop.run_in_executor(None, get_price_history, ticker, period)
+    data = await loop.run_in_executor(None, get_price_history, yf_sym, period)
     return {"ticker": ticker, "period": period, "data": data}
 
 

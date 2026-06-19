@@ -57,6 +57,14 @@ export interface ResearchResponse {
   }
 }
 
+export interface AssetInfo {
+  ticker: string
+  asset_class: 'crypto' | 'stock'
+  tradeable: boolean
+  bitget_symbol: string | null
+  yfinance_symbol: string
+}
+
 export interface DebateResponse extends ResearchResponse {
   debate: {
     ticker: string
@@ -64,6 +72,7 @@ export interface DebateResponse extends ResearchResponse {
     bear: string
     judge: string
   }
+  asset?: AssetInfo
 }
 
 export interface TradeRequest {

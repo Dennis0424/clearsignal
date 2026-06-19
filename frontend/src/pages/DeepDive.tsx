@@ -251,7 +251,7 @@ export default function DeepDive() {
             type="text"
             value={ticker}
             onChange={e => setTicker(e.target.value.toUpperCase())}
-            placeholder="Enter ticker (e.g. AAPL)"
+            placeholder="Stock or crypto (AAPL, BTC, SOL...)"
             className="w-full pl-11 pr-4 py-3 bg-bg-elevated border border-border rounded-xl text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 focus:ring-1 focus:ring-accent/20 text-sm transition-all duration-200"
           />
         </div>
@@ -309,13 +309,16 @@ function LoadingState() {
 
 function Results({ data, chartData, activeTicker }: { data: DebateResponse; chartData: PricePoint[]; activeTicker: string }) {
   const { financials, social, debate, ticker } = data
+  const asset = data.asset
+  const isCrypto = asset?.asset_class === 'crypto'
   const [earnings, setEarnings] = useState<any>(null)
   const [insiders, setInsiders] = useState<any>(null)
 
   useEffect(() => {
+    if (isCrypto) return
     fetch(`/earnings/${ticker}`).then(r => r.json()).then(setEarnings).catch(() => null)
     fetch(`/insiders/${ticker}`).then(r => r.json()).then(setInsiders).catch(() => null)
-  }, [ticker])
+  }, [ticker, isCrypto])
 
   const gaugeSignals = {
     fomo_count: social.reddit.reddit_mentions > 5 ? 2 : social.reddit.reddit_mentions > 2 ? 1 : 0,
@@ -339,8 +342,8 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
         <SocialCard data={social} />
       </div>
 
-      {/* ── Section 3: Intelligence (full-width panel, 2-col internal) ── */}
-      {(earnings || insiders) && (
+      {/* ── Section 3: Intelligence (stocks only — earnings + insiders) ── */}
+      {!isCrypto && (earnings || insiders) && (
         <SpotlightCard className="p-0 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border">
             {earnings && <div className="p-5"><EarningsWidget data={earnings} /></div>}
@@ -355,7 +358,7 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
       {/* ── Section 5: Action (Trade + Size + Chat) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5">
         <div className="space-y-5">
-          <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} />
+          <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} asset={asset} />
           <PositionSizer currentPrice={Number(financials.current_price) || 0} ticker={ticker} />
         </div>
         <ChatPanel ticker={activeTicker} />
@@ -765,7 +768,7 @@ function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
   )
 }
 
-function TradePanel({ ticker, price }: { ticker: string; price: number }) {
+function TradePanel({ ticker, price, asset }: { ticker: string; price: number; asset?: import('../types').AssetInfo }) {
   const [step, setStep] = useState<'input' | 'fomo' | 'journal' | 'done'>('input')
   const [quantity, setQuantity] = useState('')
   const [loading, setLoading] = useState(false)
@@ -776,7 +779,8 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
   const [tradeResult, setTradeResult] = useState<TradeResponse | null>(null)
   const cooldown = useCooldown()
 
-  const symbol = `${ticker}USDT`
+  const isTradeable = asset?.tradeable ?? false
+  const symbol = asset?.bitget_symbol || `${ticker}USDT`
 
   async function handleFomoCheck() {
     if (!quantity || Number(quantity) <= 0) return
@@ -795,8 +799,12 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
     setLoading(true)
     try {
       await saveDecision({ ticker, side: 'buy', quantity: Number(quantity), price, fomo_score: fomoData?.risk_level || 'LOW', fomo_signals: fomoData?.signals.map(s => s.signal) || [], reasoning, confidence, time_horizon: horizon })
-      const result = await executeTrade({ symbol, side: 'buy', quantity: Number(quantity), dry_run: false })
-      setTradeResult(result)
+      if (isTradeable) {
+        const result = await executeTrade({ symbol, side: 'buy', quantity: Number(quantity), dry_run: false })
+        setTradeResult(result)
+      } else {
+        setTradeResult({ message: 'Decision recorded. Trade stocks via your broker.' })
+      }
       setStep('done')
     } catch {
       setTradeResult({ error: 'Trade failed' })
@@ -814,7 +822,9 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
         </div>
         <div>
           <h2 className="text-base font-semibold text-text-primary">Smart Trade</h2>
-          <span className="text-xs text-text-secondary">Crypto spot trading via Bitget</span>
+          <span className="text-xs text-text-secondary">
+            {isTradeable ? `Spot trading via Bitget` : `Research only — trade crypto to execute`}
+          </span>
         </div>
       </div>
 
@@ -840,9 +850,14 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
           <AnimatePresence>
             {cooldown?.active && <CooldownBanner cooldown={cooldown} />}
           </AnimatePresence>
+          {!isTradeable && (
+            <div className="px-3 py-2 bg-gold/5 border border-gold/20 rounded-lg">
+              <span className="text-xs text-gold">Bitget supports crypto only. FOMO check still runs for your journal.</span>
+            </div>
+          )}
           <button onClick={handleFomoCheck} disabled={loading || !quantity}
             className="w-full px-4 py-2.5 bg-accent text-bg-deep rounded-xl text-sm font-medium hover:bg-accent-light transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
-            <Shield className="w-4 h-4" /> {loading ? 'Checking...' : 'Check & Trade'}
+            <Shield className="w-4 h-4" /> {loading ? 'Checking...' : isTradeable ? 'Check & Trade' : 'FOMO Check'}
           </button>
         </div>
       )}
@@ -918,7 +933,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
           </AnimatePresence>
           <button onClick={handleExecute} disabled={loading || !reasoning.trim()}
             className="w-full px-4 py-2.5 bg-gradient-to-r from-bullish to-emerald-400 text-white rounded-xl text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2">
-            <ShoppingCart className="w-4 h-4" /> {loading ? 'Executing...' : 'Record & Execute Trade'}
+            <ShoppingCart className="w-4 h-4" /> {loading ? 'Executing...' : isTradeable ? 'Record & Execute Trade' : 'Record Decision'}
           </button>
         </div>
       )}
