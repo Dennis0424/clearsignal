@@ -10,7 +10,8 @@ export default defineConfig({
       '/compare': 'http://localhost:8000',
       '/history': 'http://localhost:8000',
       '/replay': 'http://localhost:8000',
-      '/research': 'http://localhost:8000',
+      // /research/:ticker is a backend API — proxy it. The bare /research is a React page.
+      '^/research/.+': { target: 'http://localhost:8000', rewrite: (p) => p },
       '/debate': 'http://localhost:8000',
       '/trade': 'http://localhost:8000',
       '/price': 'http://localhost:8000',
@@ -18,13 +19,12 @@ export default defineConfig({
       '/analysts': 'http://localhost:8000',
       '/chat': 'http://localhost:8000',
       '/fomo-check': 'http://localhost:8000',
-      '/decision': 'http://localhost:8000',
-      '/decisions': 'http://localhost:8000',
+      '/decision': 'http://localhost:8000',   // covers /decision (POST save) and /decision-log (GET list)
       '/autopsy': 'http://localhost:8000',
       '/cooldown': 'http://localhost:8000',
       '/roast': 'http://localhost:8000',
       '/degen-score': 'http://localhost:8000',
-      '/portfolio': 'http://localhost:8000',
+      '/portfolio/assets': 'http://localhost:8000',
     },
   },
 })

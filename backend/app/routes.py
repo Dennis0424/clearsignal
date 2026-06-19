@@ -210,7 +210,7 @@ async def save_decision(body: dict):
     return {"id": row_id, "message": "Decision recorded"}
 
 
-@router.get("/decisions")
+@router.get("/decision-log")
 async def get_decisions():
     """Get all past decisions."""
     return db.get_decisions()

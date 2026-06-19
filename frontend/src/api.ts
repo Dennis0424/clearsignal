@@ -92,7 +92,7 @@ export async function saveDecision(decision: {
 }
 
 export async function getDecisions(): Promise<Decision[]> {
-  const res = await fetch(`${BASE}/decisions`)
+  const res = await fetch(`${BASE}/decision-log`)
   if (!res.ok) throw new Error(`API error: ${res.status}`)
   return res.json()
 }

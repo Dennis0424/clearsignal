@@ -517,22 +517,24 @@ function TypewriterText({ text, isInView, delay = 0, className = '' }: {
   className?: string
 }) {
   const [displayed, setDisplayed] = useState('')
-  const [started, setStarted] = useState(false)
+  // Use a ref for started so it doesn't trigger re-renders or cleanup the effect
+  const startedRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const frameRef = useRef<number>(0)
+  const frameRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    if (!isInView || started) return
+    if (!isInView || !text || startedRef.current) return
+    startedRef.current = true
+
     timerRef.current = setTimeout(() => {
-      setStarted(true)
       let i = 0
-      const speed = 18 // ms per character — fast enough to feel live, slow enough to read
+      const speed = 18
 
       const tick = () => {
-        if (i <= text.length) {
-          setDisplayed(text.slice(0, i))
-          i++
-          frameRef.current = window.setTimeout(tick, speed)
+        i++
+        setDisplayed(text.slice(0, i))
+        if (i < text.length) {
+          frameRef.current = setTimeout(tick, speed)
         }
       }
       tick()
@@ -542,12 +544,13 @@ function TypewriterText({ text, isInView, delay = 0, className = '' }: {
       if (timerRef.current) clearTimeout(timerRef.current)
       if (frameRef.current) clearTimeout(frameRef.current)
     }
-  }, [isInView, text, delay, started])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInView, text])
 
   return (
     <p className={className}>
       {displayed}
-      {started && displayed.length < text.length && (
+      {displayed.length > 0 && displayed.length < text.length && (
         <span className="inline-block w-[2px] h-[1em] bg-current align-middle ml-[1px] animate-pulse opacity-70" />
       )}
     </p>
