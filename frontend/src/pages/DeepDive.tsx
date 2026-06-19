@@ -143,7 +143,7 @@ function DegenScoreWidget() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 80, damping: 18, delay: 0.2 }}
-      className={`rounded-xl border ${c.border} ${c.bg} p-4 mb-4`}
+      className={`rounded-xl border ${c.border} ${c.bg} p-4`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
@@ -324,23 +324,34 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start gap-6">
+    <div className="space-y-8">
+      {/* ── Section 1: Signal Overview (compact horizontal strip) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-start">
         <DegenScoreWidget />
         <FearGreedGauge signals={gaugeSignals} ticker={ticker} />
       </div>
+
+      {/* ── Section 2: Price + Fundamentals ── */}
       {chartData.length > 0 && <PriceChart data={chartData} ticker={ticker} />}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <FinancialsCard data={financials} />
         <SocialCard data={social} />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {earnings && <EarningsWidget data={earnings} />}
-        {insiders && <InsiderWidget data={insiders} />}
-      </div>
+
+      {/* ── Section 3: Intelligence (Earnings + Insiders) ── */}
+      {(earnings || insiders) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {earnings && <EarningsWidget data={earnings} />}
+          {insiders && <InsiderWidget data={insiders} />}
+        </div>
+      )}
+
+      {/* ── Section 4: Multi-Agent Debate ── */}
       <DebatePanel debate={debate} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
+
+      {/* ── Section 5: Action (Trade + Size + Chat) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-5">
+        <div className="space-y-5">
           <TradePanel ticker={ticker} price={Number(financials.current_price) || 0} />
           <PositionSizer currentPrice={Number(financials.current_price) || 0} ticker={ticker} />
         </div>
@@ -800,7 +811,7 @@ function TradePanel({ ticker, price }: { ticker: string; price: number }) {
         </div>
         <div>
           <h2 className="text-base font-semibold text-text-primary">Smart Trade</h2>
-          <span className="text-xs text-text-secondary">FOMO-protected via Bitget</span>
+          <span className="text-xs text-text-secondary">Crypto spot trading via Bitget</span>
         </div>
       </div>
 
