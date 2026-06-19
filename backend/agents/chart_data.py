@@ -1,9 +1,11 @@
 import yfinance as yf
+from curl_cffi.requests import Session as CurlSession
 
 
 def get_price_history(ticker: str, period: str = "3mo", interval: str = "1d") -> list[dict]:
     """Fetch historical price data for sparkline/chart display."""
-    stock = yf.Ticker(ticker)
+    session = CurlSession(impersonate="chrome")
+    stock = yf.Ticker(ticker, session=session)
     hist = stock.history(period=period, interval=interval)
 
     if hist.empty:
@@ -24,7 +26,8 @@ def get_price_history(ticker: str, period: str = "3mo", interval: str = "1d") ->
 
 def get_analyst_data(ticker: str) -> dict:
     """Fetch analyst ratings and target prices."""
-    stock = yf.Ticker(ticker)
+    session = CurlSession(impersonate="chrome")
+    stock = yf.Ticker(ticker, session=session)
     info = stock.info or {}
 
     return {

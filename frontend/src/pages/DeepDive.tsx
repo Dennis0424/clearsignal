@@ -556,7 +556,7 @@ function TypewriterText({ text, isInView, delay = 0, className = '' }: {
 
 function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-60px' })
+  const isInView = useInView(ref, { once: true, amount: 0.1 })
 
   return (
     <div ref={ref} className="rounded-xl overflow-hidden border border-border bg-bg-card">

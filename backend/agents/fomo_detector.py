@@ -1,11 +1,13 @@
 import yfinance as yf
+from curl_cffi.requests import Session as CurlSession
 from app.llm_client import get_llm_client
 from app.database import Database
 
 
 def check_fomo_signals(ticker: str, db: Database | None = None) -> dict:
     """Check 4 FOMO signals for a ticker. Returns risk score + triggered signals."""
-    stock = yf.Ticker(ticker)
+    session = CurlSession(impersonate="chrome")
+    stock = yf.Ticker(ticker, session=session)
     info = stock.info or {}
     signals = []
 

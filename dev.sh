@@ -5,8 +5,8 @@ echo "Starting ClearSignal dev servers..."
 
 # Backend
 cd backend
-source ../.venv/Scripts/activate 2>/dev/null || source ../.venv/bin/activate
-python -m uvicorn app.main:app --reload --port 8000 &
+PYTHON=$(ls ../.venv/Scripts/python.exe 2>/dev/null || ls ../.venv/bin/python 2>/dev/null || echo python)
+$PYTHON -m uvicorn app.main:app --reload --port 8000 &
 BACKEND_PID=$!
 cd ..
 

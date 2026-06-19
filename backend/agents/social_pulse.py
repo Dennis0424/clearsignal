@@ -1,5 +1,6 @@
 import httpx
 import yfinance as yf
+from curl_cffi.requests import Session as CurlSession
 
 
 def get_reddit_sentiment(ticker: str, limit: int = 10) -> dict:
@@ -37,7 +38,8 @@ def get_reddit_sentiment(ticker: str, limit: int = 10) -> dict:
 
 def get_news_headlines(ticker: str) -> list[dict]:
     """Fetch recent news headlines from yfinance."""
-    stock = yf.Ticker(ticker)
+    session = CurlSession(impersonate="chrome")
+    stock = yf.Ticker(ticker, session=session)
     news = stock.news or []
     headlines = []
     for item in news[:8]:

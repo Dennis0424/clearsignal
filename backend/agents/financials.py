@@ -1,9 +1,11 @@
 import yfinance as yf
+from curl_cffi.requests import Session as CurlSession
 
 
 def get_financials(ticker: str) -> dict:
     """Fetch key financial metrics for a ticker using yfinance."""
-    stock = yf.Ticker(ticker)
+    session = CurlSession(impersonate="chrome")
+    stock = yf.Ticker(ticker, session=session)
 
     info = stock.info or {}
 
