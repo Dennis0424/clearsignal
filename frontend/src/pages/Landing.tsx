@@ -256,8 +256,8 @@ function ScrollFeatureSection() {
           <span className="text-xs font-mono text-accent uppercase tracking-[0.16em]">Platform Tour</span>
         </div>
 
-        {/* Sticky scroll container — tall enough for 4 scroll steps */}
-        <div ref={containerRef} className="relative h-[300vh]">
+        {/* Sticky scroll container */}
+        <div ref={containerRef} className="relative h-[150vh]">
           <div className="sticky top-[15vh] grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-16 items-center">
 
             {/* Left: swapping text */}
@@ -402,26 +402,26 @@ export default function Landing() {
 
   /* ─── Feature section inView ─── */
   const featuresRef = useRef<HTMLDivElement>(null)
-  const featuresInView = useInView(featuresRef, { once: true, margin: '-100px' })
+  const featuresInView = useInView(featuresRef, { once: true, amount: 0.1 })
 
   /* ─── How it works inView ─── */
   const howRef = useRef<HTMLDivElement>(null)
-  const howInView = useInView(howRef, { once: true, margin: '-100px' })
+  const howInView = useInView(howRef, { once: true, amount: 0.1 })
 
   /* ─── Trust bar inView ─── */
   const trustRef = useRef<HTMLDivElement>(null)
-  const trustInView = useInView(trustRef, { once: true, margin: '-50px' })
+  const trustInView = useInView(trustRef, { once: true, amount: 0.1 })
 
   /* ─── CTA inView ─── */
   const ctaRef = useRef<HTMLDivElement>(null)
-  const ctaInView = useInView(ctaRef, { once: true, margin: '-50px' })
+  const ctaInView = useInView(ctaRef, { once: true, amount: 0.1 })
 
   return (
     <div className="min-h-[100dvh] bg-bg-deep">
       <ScrollProgressBar />
 
       {/* Hero - left-aligned, asymmetric */}
-      <section ref={heroRef} className="min-h-[100dvh] flex items-center px-6 md:px-12 relative overflow-hidden">
+      <section ref={heroRef} className="min-h-[80dvh] flex items-center px-6 md:px-12 pt-20 pb-16 relative overflow-hidden">
         <ParticleCanvas />
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-[1fr_0.8fr] gap-16 items-center">
           <motion.div
@@ -598,6 +598,28 @@ export default function Landing() {
                 <div className="text-accent mt-1">Order filled. Decision logged.</div>
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Kinetic marquee strip */}
+      <section className="py-8 border-t border-border overflow-hidden">
+        <div className="relative">
+          <style>{`
+            @keyframes marquee-landing { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+            .marquee-landing-track { animation: marquee-landing 25s linear infinite; }
+            .marquee-landing-track:hover { animation-play-state: paused; }
+          `}</style>
+          <div className="marquee-landing-track inline-flex w-max items-center gap-12 px-6">
+            {[...Array(2)].map((_, dup) => (
+              <div key={dup} className="inline-flex items-center gap-12">
+                {['Multi-Agent Research', 'FOMO Detection', 'Bull vs Bear Debate', 'Earnings Calendar', 'Insider Tracking', 'Position Sizing', 'Decision Journal', 'Degen Score'].map((item) => (
+                  <span key={`${dup}-${item}`} className="text-sm font-medium text-text-muted/50 whitespace-nowrap uppercase tracking-[0.2em]">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </section>
