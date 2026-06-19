@@ -19,7 +19,8 @@ export default defineConfig({
       '/analysts': 'http://localhost:8000',
       '/chat': 'http://localhost:8000',
       '/fomo-check': 'http://localhost:8000',
-      '/decision': 'http://localhost:8000',   // covers /decision (POST save) and /decision-log (GET list)
+      '/decision-log': 'http://localhost:8000',
+      '/decision-save': 'http://localhost:8000',
       '/autopsy': 'http://localhost:8000',
       '/cooldown': 'http://localhost:8000',
       '/roast': 'http://localhost:8000',

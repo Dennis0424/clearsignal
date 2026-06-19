@@ -191,7 +191,7 @@ async def fomo_check(ticker: str, body: dict):
     return {**fomo_data, "regret": regret, "warning": warning}
 
 
-@router.post("/decision")
+@router.post("/decision-save")
 async def save_decision(body: dict):
     """Save a decision journal entry and optionally execute trade."""
     import json

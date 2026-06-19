@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import LandingNav from './components/LandingNav'
+import TickerTape from './components/TickerTape'
 import Landing from './pages/Landing'
 import DeepDive from './pages/DeepDive'
 import Portfolio from './pages/Portfolio'
@@ -12,6 +13,7 @@ function Layout() {
 
   return (
     <>
+      {!isLanding && <TickerTape />}
       {isLanding ? <LandingNav /> : <Navbar />}
       <main className="flex-1">
         <Routes>

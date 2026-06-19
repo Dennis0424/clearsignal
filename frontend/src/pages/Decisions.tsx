@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { BookOpen, Brain, Sparkles, Flame } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { getDecisions, getAutopsy } from '../api'
+import AchievementBadges from '../components/AchievementBadges'
 import type { Decision, AutopsyStats } from '../types'
 
 const pageVariants = {
@@ -212,6 +213,12 @@ export default function Decisions() {
             </motion.div>
           )}
         </>
+      )}
+
+      {decisions.length > 0 && (
+        <motion.div className="mb-6" variants={itemVariants} initial="hidden" animate="visible">
+          <AchievementBadges decisions={decisions} />
+        </motion.div>
       )}
 
       <RoastPanel hasDecisions={decisions.length > 0} />

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'motion/react'
 import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain, Swords, Activity } from 'lucide-react'
+import FearGreedGauge from '../components/FearGreedGauge'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -305,9 +306,19 @@ function LoadingState() {
 function Results({ data, chartData, activeTicker }: { data: DebateResponse; chartData: PricePoint[]; activeTicker: string }) {
   const { financials, social, debate, ticker } = data
 
+  const gaugeSignals = {
+    fomo_count: social.reddit.reddit_mentions > 5 ? 2 : social.reddit.reddit_mentions > 2 ? 1 : 0,
+    social_count: social.news_headlines.length,
+    near_high: Boolean(financials.near_52w_high),
+    price_spike: Boolean(financials.price_spike),
+  }
+
   return (
     <div className="space-y-6">
-      <DegenScoreWidget />
+      <div className="flex flex-wrap items-start gap-6">
+        <DegenScoreWidget />
+        <FearGreedGauge signals={gaugeSignals} ticker={ticker} />
+      </div>
       {chartData.length > 0 && <PriceChart data={chartData} ticker={ticker} />}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FinancialsCard data={financials} />

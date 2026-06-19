@@ -82,7 +82,7 @@ export async function saveDecision(decision: {
   fomo_score: string; fomo_signals: string[]; reasoning: string;
   confidence: number; time_horizon: string;
 }): Promise<{ id: number; message: string }> {
-  const res = await fetch(`${BASE}/decision`, {
+  const res = await fetch(`${BASE}/decision-save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(decision),
