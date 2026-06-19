@@ -339,12 +339,14 @@ function Results({ data, chartData, activeTicker }: { data: DebateResponse; char
         <SocialCard data={social} />
       </div>
 
-      {/* ── Section 3: Intelligence (Earnings + Insiders) ── */}
+      {/* ── Section 3: Intelligence (full-width panel, 2-col internal) ── */}
       {(earnings || insiders) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {earnings && <EarningsWidget data={earnings} />}
-          {insiders && <InsiderWidget data={insiders} />}
-        </div>
+        <SpotlightCard className="p-0 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border">
+            {earnings && <div className="p-5"><EarningsWidget data={earnings} /></div>}
+            {insiders && <div className="p-5"><InsiderWidget data={insiders} /></div>}
+          </div>
+        </SpotlightCard>
       )}
 
       {/* ── Section 4: Multi-Agent Debate ── */}

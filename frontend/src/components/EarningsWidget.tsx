@@ -40,7 +40,6 @@ export default function EarningsWidget({ data }: Props) {
 
   return (
     <motion.div
-      className="rounded-xl border border-border bg-bg-card p-5"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 120, damping: 18 }}

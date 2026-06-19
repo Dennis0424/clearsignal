@@ -52,7 +52,7 @@ export default function InsiderWidget({ data }: Props) {
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-      className="rounded-xl border border-border bg-bg-card p-5"
+      className=""
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
