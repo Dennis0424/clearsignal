@@ -1,9 +1,163 @@
 import { useState, useEffect, useRef } from 'react'
-import { BookOpen, Brain, Sparkles, Flame } from 'lucide-react'
+import { BookOpen, Brain, Sparkles, Flame, Activity, Clock, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { getDecisions, getAutopsy } from '../api'
 import AchievementBadges from '../components/AchievementBadges'
 import type { Decision, AutopsyStats } from '../types'
+
+// ── Behavioral Health Panel ─────────────────────────────────────
+type DegenData = {
+  score: number
+  level: 'zen' | 'spicy' | 'degen'
+  factors: Array<{ label: string; value: string; points: number }>
+  message: string
+}
+
+type CooldownData = {
+  active: boolean
+  seconds_remaining: number
+  minutes_remaining: number
+  last_loss_pct: number | null
+  last_loss_ticker: string | null
+  message: string
+}
+
+function BehavioralHealthPanel() {
+  const [degen, setDegen] = useState<DegenData | null>(null)
+  const [cooldown, setCooldown] = useState<CooldownData | null>(null)
+  const [secs, setSecs] = useState(0)
+
+  useEffect(() => {
+    fetch('/degen-score').then(r => r.json()).then(setDegen).catch(() => null)
+    fetch('/cooldown').then(r => r.json()).then(d => {
+      setCooldown(d)
+      setSecs(d.seconds_remaining || 0)
+    }).catch(() => null)
+  }, [])
+
+  useEffect(() => {
+    if (!cooldown?.active || secs <= 0) return
+    const id = setInterval(() => setSecs(s => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(id)
+  }, [cooldown?.active, secs])
+
+  if (!degen && !cooldown) return null
+
+  const c = degen ? {
+    zen: { text: 'text-accent', bar: 'bg-accent', border: 'border-accent/20', bg: 'bg-accent/5' },
+    spicy: { text: 'text-gold', bar: 'bg-gold', border: 'border-gold/20', bg: 'bg-gold/5' },
+    degen: { text: 'text-bearish', bar: 'bg-bearish', border: 'border-bearish/20', bg: 'bg-bearish/5' },
+  }[degen.level] : null
+
+  const coolMins = Math.floor(secs / 60)
+  const coolSecs = secs % 60
+  const coolPct = cooldown && cooldown.seconds_remaining > 0 ? (secs / cooldown.seconds_remaining) * 100 : 0
+
+  return (
+    <motion.div
+      className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 80, damping: 18 }}
+    >
+      {/* Degen Score */}
+      {degen && c && (
+        <div className={`rounded-xl border ${c.border} ${c.bg} p-5`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-text-muted" />
+              <span className="text-[11px] font-mono font-semibold text-text-muted uppercase tracking-[0.14em]">Degen Score</span>
+            </div>
+            <span className={`text-[10px] font-mono font-bold ${c.text} uppercase tracking-wide px-2 py-0.5 rounded bg-bg-card border border-border`}>
+              {{ zen: 'ZEN', spicy: 'SPICY', degen: 'DEGEN' }[degen.level]}
+            </span>
+          </div>
+          <div className="flex items-baseline gap-2 mb-2">
+            <motion.span
+              className={`text-3xl font-black font-mono ${c.text} tabular-nums`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {degen.score}
+            </motion.span>
+            <span className="text-xs font-mono text-text-muted">/ 100</span>
+          </div>
+          <div className="w-full h-[3px] bg-bg-elevated rounded-full overflow-hidden mb-3">
+            <motion.div
+              className={`h-full ${c.bar} rounded-full`}
+              initial={{ width: 0 }}
+              animate={{ width: `${degen.score}%` }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+            />
+          </div>
+          {degen.factors.length > 0 && (
+            <div className="space-y-1 mb-2">
+              {degen.factors.map((f, i) => (
+                <div key={i} className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-text-muted">{f.label}</span>
+                  <span className={c.text}>{f.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-[11px] text-text-muted leading-relaxed">{degen.message}</p>
+        </div>
+      )}
+
+      {/* Cooldown Timer */}
+      {cooldown && (
+        <div className={`rounded-xl border p-5 ${cooldown.active ? 'border-bearish/30 bg-bearish/5' : 'border-border bg-bg-card'}`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-text-muted" />
+              <span className="text-[11px] font-mono font-semibold text-text-muted uppercase tracking-[0.14em]">Cooldown</span>
+            </div>
+            {cooldown.active ? (
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-bearish animate-pulse" />
+                <span className="text-[10px] font-mono text-bearish uppercase tracking-wide">Active</span>
+              </div>
+            ) : (
+              <span className="text-[10px] font-mono text-accent uppercase tracking-wide px-2 py-0.5 rounded bg-accent/5 border border-accent/20">Clear</span>
+            )}
+          </div>
+          {cooldown.active ? (
+            <>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-3xl font-black font-mono text-bearish tabular-nums">
+                  {String(coolMins).padStart(2, '0')}:{String(coolSecs).padStart(2, '0')}
+                </span>
+                <span className="text-xs font-mono text-text-muted ml-1">remaining</span>
+              </div>
+              <div className="w-full h-[3px] bg-bearish/20 rounded-full overflow-hidden mb-3">
+                <motion.div
+                  className="h-full bg-bearish rounded-full"
+                  initial={{ width: '100%' }}
+                  animate={{ width: `${coolPct}%` }}
+                  transition={{ duration: 1, ease: 'linear' }}
+                />
+              </div>
+              {cooldown.last_loss_ticker && (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <AlertTriangle className="w-3 h-3 text-bearish/60" />
+                  <span className="text-[10px] text-text-muted font-mono">
+                    Last loss: {cooldown.last_loss_ticker} {cooldown.last_loss_pct?.toFixed(1)}%
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-baseline gap-1 mb-2">
+              <span className="text-3xl font-black font-mono text-accent tabular-nums">00:00</span>
+            </div>
+          )}
+          <p className="text-[11px] text-text-muted leading-relaxed">{cooldown.message}</p>
+        </div>
+      )}
+    </motion.div>
+  )
+}
 
 const pageVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -191,6 +345,9 @@ export default function Decisions() {
           <p className="text-text-secondary text-sm">Journal + Autopsy Report</p>
         </div>
       </motion.div>
+
+      {/* Behavioral Health Panel */}
+      <BehavioralHealthPanel />
 
       {/* Autopsy Stats */}
       {autopsy && autopsy.total_trades > 0 && (
