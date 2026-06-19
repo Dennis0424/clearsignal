@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence, useInView } from 'motion/react'
 import { Search, TrendingUp, TrendingDown, Scale, MessageCircle, Newspaper, DollarSign, BarChart3, ShoppingCart, CheckCircle, AlertTriangle, Zap, Microscope, Send, Bot, User, Shield, Brain, Swords, Activity } from 'lucide-react'
 import FearGreedGauge from '../components/FearGreedGauge'
@@ -7,6 +8,7 @@ import InsiderWidget from '../components/InsiderWidget'
 import PositionSizer from '../components/PositionSizer'
 import WhatIfSimulator from '../components/WhatIfSimulator'
 import SpotlightCard from '../components/SpotlightCard'
+import MarketScanner from '../components/MarketScanner'
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { debateTicker, executeTrade, getChartData, chatWithStock, fomoCheck, saveDecision } from '../api'
 import type { DebateResponse, TradeResponse, PricePoint, ChatMessage, FomoCheckResponse } from '../types'
@@ -200,6 +202,7 @@ function DegenScoreWidget() {
 }
 
 export default function DeepDive() {
+  const [searchParams] = useSearchParams()
   const [ticker, setTicker] = useState('')
   const [activeTicker, setActiveTicker] = useState('')
   const [loading, setLoading] = useState(false)
@@ -207,16 +210,12 @@ export default function DeepDive() {
   const [chartData, setChartData] = useState<PricePoint[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!ticker.trim()) return
-    const t = ticker.trim().toUpperCase()
+  async function runResearch(t: string) {
     setActiveTicker(t)
     setLoading(true)
     setError(null)
     setData(null)
     setChartData([])
-
     try {
       const [debateResult, chart] = await Promise.all([
         debateTicker(t),
@@ -229,6 +228,23 @@ export default function DeepDive() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Auto-research if ticker param in URL (e.g., from MarketScanner click)
+  useEffect(() => {
+    const paramTicker = searchParams.get('ticker')
+    if (paramTicker) {
+      const t = paramTicker.toUpperCase()
+      setTicker(t)
+      runResearch(t)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!ticker.trim()) return
+    runResearch(ticker.trim().toUpperCase())
   }
 
   return (
@@ -274,6 +290,17 @@ export default function DeepDive() {
         </div>
       )}
       {data && <Results data={data} chartData={chartData} activeTicker={activeTicker} />}
+
+      {/* Market Scanner — show when no active research */}
+      {!loading && !data && !error && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <MarketScanner />
+        </motion.div>
+      )}
     </motion.div>
   )
 }

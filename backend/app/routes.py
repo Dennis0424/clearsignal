@@ -10,7 +10,7 @@ from agents.financials import get_financials, format_financials_for_prompt
 from agents.social_pulse import get_social_pulse, format_social_for_prompt
 from agents.debate import run_debate
 from agents.trader import get_ticker_price, place_spot_order, preview_trade, get_account_assets
-from agents.chart_data import get_price_history, get_analyst_data
+from agents.chart_data import get_price_history, get_analyst_data, get_scanner_data
 from agents.stock_intel import get_earnings_calendar, get_insider_transactions, get_whatif_simulation, get_portfolio_correlation
 from agents.ticker_utils import asset_info, yfinance_symbol, is_crypto
 from agents.chat import chat_about_stock
@@ -474,6 +474,15 @@ async def whatif_simulation(ticker: str, amount: float = 1000, days_ago: int = 3
     import asyncio
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(None, get_whatif_simulation, ticker, amount, days_ago)
+    return data
+
+
+@router.get("/scanner")
+async def market_scanner():
+    """Quick market scan: price + 1d change for preset watchlist."""
+    import asyncio
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_scanner_data)
     return data
 
 

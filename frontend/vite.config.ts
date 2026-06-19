@@ -30,6 +30,7 @@ export default defineConfig({
       '/insiders': 'http://localhost:8000',
       '/whatif': 'http://localhost:8000',
       '/correlation': 'http://localhost:8000',
+      '/scanner': 'http://localhost:8000',
     },
   },
 })

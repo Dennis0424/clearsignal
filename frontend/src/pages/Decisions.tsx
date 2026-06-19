@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { BookOpen, Brain, Sparkles, Flame, Activity, Clock, AlertTriangle } from 'lucide-react'
+import { BookOpen, Brain, Sparkles, Flame, Activity, Clock, AlertTriangle, TrendingUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { getDecisions, getAutopsy } from '../api'
 import AchievementBadges from '../components/AchievementBadges'
 import type { Decision, AutopsyStats } from '../types'
@@ -155,6 +156,73 @@ function BehavioralHealthPanel() {
           <p className="text-[11px] text-text-muted leading-relaxed">{cooldown.message}</p>
         </div>
       )}
+    </motion.div>
+  )
+}
+
+// ── P&L Cumulative Chart ──────────────────────────────────────
+function PnLChart({ decisions }: { decisions: Decision[] }) {
+  const resolved = decisions.filter(d => d.outcome_pct != null).reverse()
+  if (resolved.length < 2) return null
+
+  let cumulative = 0
+  const chartData = resolved.map((d, i) => {
+    cumulative += d.outcome_pct!
+    return {
+      index: i + 1,
+      ticker: d.ticker,
+      cumPnL: parseFloat(cumulative.toFixed(2)),
+      trade: parseFloat(d.outcome_pct!.toFixed(2)),
+    }
+  })
+
+  const lastVal = chartData[chartData.length - 1]?.cumPnL ?? 0
+  const isPositive = lastVal >= 0
+
+  return (
+    <motion.div
+      className="bg-bg-card border border-border rounded-xl p-5 mb-6"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 80, damping: 18, delay: 0.1 }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-accent" />
+          <span className="text-sm font-semibold text-text-primary">Cumulative P&L</span>
+        </div>
+        <div className={`text-lg font-black font-mono tabular-nums ${isPositive ? 'text-bullish' : 'text-bearish'}`}>
+          {isPositive ? '+' : ''}{lastVal.toFixed(2)}%
+        </div>
+      </div>
+      <div className="h-36">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
+            <defs>
+              <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0.25} />
+                <stop offset="100%" stopColor={isPositive ? '#10b981' : '#ef4444'} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" strokeDasharray="4 2" />
+            <XAxis dataKey="index" hide />
+            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+            <Tooltip
+              contentStyle={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', fontSize: '11px' }}
+              labelStyle={{ color: '#52525b', marginBottom: '2px' }}
+              itemStyle={{ color: '#fafafa' }}
+              labelFormatter={(_, payload) => payload?.[0]?.payload?.ticker || ''}
+              formatter={(val: number) => [`${val >= 0 ? '+' : ''}${val}%`, 'Cumulative']}
+            />
+            <Area type="monotone" dataKey="cumPnL" stroke={isPositive ? '#10b981' : '#ef4444'} strokeWidth={2} fill="url(#pnlGrad)" dot={false} activeDot={{ r: 4 }} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="flex items-center gap-4 mt-2 text-[10px] text-text-muted font-mono">
+        <span>{resolved.length} resolved trades</span>
+        <span className="text-bullish">{resolved.filter(d => d.outcome_pct! >= 0).length} wins</span>
+        <span className="text-bearish">{resolved.filter(d => d.outcome_pct! < 0).length} losses</span>
+      </div>
     </motion.div>
   )
 }
@@ -371,6 +439,9 @@ export default function Decisions() {
           )}
         </>
       )}
+
+      {/* P&L Chart */}
+      {decisions.length >= 2 && <PnLChart decisions={decisions} />}
 
       {decisions.length > 0 && (
         <motion.div className="mb-6" variants={itemVariants} initial="hidden" animate="visible">
