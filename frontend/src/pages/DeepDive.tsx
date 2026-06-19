@@ -556,7 +556,15 @@ function TypewriterText({ text, isInView, delay = 0, className = '' }: {
 
 function DebatePanel({ debate }: { debate: DebateResponse['debate'] }) {
   const ref = useRef<HTMLDivElement>(null)
-  const isInView = useInView(ref, { once: true, amount: 0.1 })
+  const inViewFromScroll = useInView(ref, { once: true, amount: 0.1 })
+  // If the element is already on screen when it mounts, IntersectionObserver may not fire.
+  // Force-trigger after 200ms as a fallback so text always appears.
+  const [forcedInView, setForcedInView] = useState(false)
+  useEffect(() => {
+    const id = setTimeout(() => setForcedInView(true), 200)
+    return () => clearTimeout(id)
+  }, [])
+  const isInView = inViewFromScroll || forcedInView
 
   return (
     <div ref={ref} className="rounded-xl overflow-hidden border border-border bg-bg-card">
