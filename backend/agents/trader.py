@@ -57,6 +57,49 @@ def get_ticker_price(symbol: str) -> dict:
         return {"error": str(e)}
 
 
+def _get_demo_portfolio() -> dict:
+    """Build demo portfolio adjusted by simulated trades from the decisions DB."""
+    import sqlite3
+
+    base = {"USDT": 10000.0, "BTC": 0.15, "ETH": 2.50}
+
+    try:
+        conn = sqlite3.connect("trades.db")
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute("SELECT ticker, side, quantity, price FROM decisions").fetchall()
+        conn.close()
+
+        for row in rows:
+            coin = row["ticker"].upper().replace("USDT", "").replace("-USD", "")
+            qty = float(row["quantity"])
+            price = float(row["price"])
+            if row["side"] == "buy":
+                base[coin] = base.get(coin, 0) + qty
+                base["USDT"] -= qty * price
+            elif row["side"] == "sell":
+                base[coin] = base.get(coin, 0) - qty
+                base["USDT"] += qty * price
+    except Exception:
+        pass
+
+    assets = []
+    for coin, amount in base.items():
+        if amount > 0.000001 or amount < -0.000001:
+            assets.append({
+                "coin": coin,
+                "available": f"{max(0, amount):.6f}",
+                "frozen": "0.000000",
+                "locked": "0.000000",
+                "uTime": "",
+            })
+
+    return {
+        "assets": assets,
+        "demo": True,
+        "note": "Demo portfolio — reflects simulated trades",
+    }
+
+
 def get_account_assets() -> dict:
     """Get spot account assets."""
     path = "/api/v2/spot/account/assets"
@@ -66,18 +109,8 @@ def get_account_assets() -> dict:
         data = resp.json()
         if data.get("code") == "00000":
             return {"assets": data.get("data", [])}
-        # 40099 = Bitget demo/hackathon keys — demo accounts show a mock portfolio
         if data.get("code") == "40099":
-            return {
-                "assets": [
-                    {"coin": "USDT", "available": "10000.00", "frozen": "0.00", "locked": "0.00", "uTime": ""},
-                    {"coin": "BTC", "available": "0.15", "frozen": "0.00", "locked": "0.00", "uTime": ""},
-                    {"coin": "ETH", "available": "2.50", "frozen": "0.00", "locked": "0.00", "uTime": ""},
-                    {"coin": "NVDA", "available": "10.00", "frozen": "0.00", "locked": "0.00", "uTime": ""},
-                ],
-                "demo": True,
-                "note": "Demo portfolio — Bitget hackathon sandbox account",
-            }
+            return _get_demo_portfolio()
         return {"error": data.get("msg", "Auth failed")}
     except Exception as e:
         return {"error": str(e)}
