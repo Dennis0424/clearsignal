@@ -15,6 +15,7 @@ from agents.stock_intel import get_earnings_calendar, get_insider_transactions, 
 from agents.ticker_utils import asset_info, yfinance_symbol, is_crypto
 from agents.chat import chat_about_stock
 from agents.fomo_detector import check_fomo_signals, regret_simulation, generate_fomo_warning
+from agents.backtest_engine import run_backtest as _run_backtest
 
 router = APIRouter()
 db = Database("trades.db")
@@ -495,4 +496,14 @@ async def portfolio_correlation(tickers: str):
         return {"error": "Need at least 2 tickers"}
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(None, get_portfolio_correlation, ticker_list)
+    return data
+
+
+@router.get("/backtest")
+async def backtest_ticker(ticker: str, period: str = "2y"):
+    """Run historical backtest for a ticker using price-derived signal proxies."""
+    import asyncio
+    ticker = ticker.upper()
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, _run_backtest, ticker, period)
     return data

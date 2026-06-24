@@ -77,3 +77,26 @@ def test_run_backtest_no_negative_equity():
     result = run_backtest("AAPL", "1y")
     for point in result["equity_curve"]:
         assert point["clearsignal"] >= 0
+
+
+def test_backtest_route_returns_200():
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.get("/backtest?ticker=AAPL&period=1y")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ticker"] == "AAPL"
+    assert "equity_curve" in data
+    assert "stats" in data
+
+
+def test_backtest_route_default_period():
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    client = TestClient(app)
+    response = client.get("/backtest?ticker=MSFT")
+    assert response.status_code == 200
+    assert response.json()["period"] == "2y"
