@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { TrendingUp, TrendingDown, Zap, RefreshCw } from 'lucide-react'
-import { LineChart, Line, ResponsiveContainer } from 'recharts'
+import { LineChart, Line } from 'recharts'
 
 type ScanRow = {
   ticker: string
@@ -134,20 +134,18 @@ export default function MarketScanner() {
                 </div>
 
                 {/* Sparkline */}
-                <div className="h-8 w-14">
+                <div className="h-8 w-14 shrink-0">
                   {row.sparkline.length >= 2 && (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={row.sparkline.map((v, i) => ({ v, i }))}>
-                        <Line
-                          type="monotone"
-                          dataKey="v"
-                          stroke={row.change_pct >= 0 ? '#10b981' : '#ef4444'}
-                          strokeWidth={1.5}
-                          dot={false}
-                          isAnimationActive={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                    <LineChart width={56} height={32} data={row.sparkline.map((v, i) => ({ v, i }))}>
+                      <Line
+                        type="monotone"
+                        dataKey="v"
+                        stroke={row.change_pct >= 0 ? '#10b981' : '#ef4444'}
+                        strokeWidth={1.5}
+                        dot={false}
+                        isAnimationActive={false}
+                      />
+                    </LineChart>
                   )}
                 </div>
               </motion.button>

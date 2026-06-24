@@ -1,11 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { motion, useScroll, useTransform, useInView } from 'motion/react'
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'motion/react'
 import SignalMark from '../components/SignalMark'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-gsap.registerPlugin(ScrollTrigger)
 
 /* ─── Particle canvas background ─── */
 function ParticleCanvas() {
@@ -230,10 +226,11 @@ const cardVariants = {
   },
 }
 
-/* ─── Apple-style sticky scroll feature tour ─── */
+/* ─── Tabbed feature tour (replaces h-[150vh] sticky scroll) ─── */
 function ScrollFeatureSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
   const [activeStep, setActiveStep] = useState(0)
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, amount: 0.2 })
 
   const steps = [
     {
@@ -262,26 +259,6 @@ function ScrollFeatureSection() {
     },
   ]
 
-  useEffect(() => {
-    if (!containerRef.current) return
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return
-
-    const ctx = gsap.context(() => {
-      steps.forEach((_, i) => {
-        ScrollTrigger.create({
-          trigger: containerRef.current,
-          start: `top+=${i * 25}% center`,
-          end: `top+=${(i + 1) * 25}% center`,
-          onEnter: () => setActiveStep(i),
-          onEnterBack: () => setActiveStep(i),
-        })
-      })
-    }, containerRef)
-
-    return () => ctx.revert()
-  }, [])
-
   const agentRows = [
     { key: 'technical', label: 'Technical', value: '+1.4σ', color: 'text-bullish' },
     { key: 'fomo', label: 'FOMO Check', value: 'LOW', color: 'text-accent' },
@@ -290,95 +267,113 @@ function ScrollFeatureSection() {
   ]
 
   return (
-    <section className="px-6 md:px-12 py-24 border-t border-border">
+    <section ref={ref} className="px-6 md:px-12 py-24 border-t border-border">
       <div className="max-w-7xl mx-auto">
         {/* Section label */}
-        <div className="flex items-center gap-3 mb-16">
+        <motion.div
+          initial={{ opacity: 0, x: -12 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center gap-3 mb-10"
+        >
           <div className="h-[1px] w-8 bg-accent" />
           <span className="text-xs font-mono text-accent uppercase tracking-[0.16em]">Platform Tour</span>
-        </div>
+        </motion.div>
 
-        {/* Sticky scroll container */}
-        <div ref={containerRef} className="relative h-[150vh]">
-          <div className="sticky top-[15vh] grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-16 items-center">
+        {/* Tab buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-wrap gap-2 mb-10"
+        >
+          {steps.map((step, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveStep(i)}
+              className="relative px-4 py-2 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer"
+              style={{ color: activeStep === i ? 'var(--color-bg-deep)' : undefined }}
+            >
+              {activeStep === i && (
+                <motion.span
+                  layoutId="feature-tab-pill"
+                  className="absolute inset-0 rounded-full bg-accent"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                />
+              )}
+              <span className={`relative z-10 ${activeStep === i ? 'text-bg-deep' : 'text-text-muted hover:text-text-secondary'}`}>
+                <span className="font-mono mr-1.5 opacity-60">{String(i + 1).padStart(2, '0')}</span>
+                {step.label}
+              </span>
+            </button>
+          ))}
+        </motion.div>
 
-            {/* Left: swapping text */}
-            <div className="relative min-h-[280px]">
-              {steps.map((step, i) => (
+        {/* Content grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.45, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-12 items-center"
+        >
+          {/* Left: animated text */}
+          <div className="relative min-h-[200px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <h2 className="text-2xl md:text-3xl font-bold text-text-primary tracking-tight leading-[1.1] mb-4">
+                  {steps[activeStep].heading}
+                </h2>
+                <p className="text-base text-text-secondary leading-relaxed max-w-[46ch]">
+                  {steps[activeStep].body}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Right: product UI */}
+          <div className="hidden lg:block bg-bg-card border border-border rounded-xl p-5 shadow-2xl shadow-black/40">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <span className="text-xs font-mono text-text-muted">AAPL — Live Analysis</span>
+              </div>
+              <span className="text-xs font-mono text-text-muted">Score 7.2/10</span>
+            </div>
+            <div className="space-y-1">
+              {agentRows.map((row) => (
                 <motion.div
-                  key={i}
-                  initial={false}
-                  animate={activeStep === i
-                    ? { opacity: 1, y: 0, pointerEvents: 'auto' }
-                    : { opacity: 0, y: activeStep > i ? -16 : 16, pointerEvents: 'none' }
+                  key={row.key}
+                  animate={steps[activeStep]?.highlight === row.key
+                    ? { backgroundColor: 'rgba(16,185,129,0.06)', x: 3 }
+                    : { backgroundColor: 'rgba(0,0,0,0)', x: 0 }
                   }
-                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="absolute inset-0"
+                  transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                  className="flex items-center justify-between py-2.5 px-3 rounded-lg border border-transparent"
+                  style={steps[activeStep]?.highlight === row.key ? { borderColor: 'rgba(16,185,129,0.15)' } : {}}
                 >
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xs font-mono text-accent">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="text-xs font-mono text-text-muted uppercase tracking-widest">{step.label}</span>
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-text-primary tracking-tight leading-[1.1] mb-5">
-                    {step.heading}
-                  </h2>
-                  <p className="text-base text-text-secondary leading-relaxed max-w-[46ch]">
-                    {step.body}
-                  </p>
+                  <span className="text-xs text-text-secondary">{row.label}</span>
+                  <span className={`text-xs font-mono font-semibold ${steps[activeStep]?.highlight === row.key ? row.color : 'text-text-muted'}`}>
+                    {row.value}
+                  </span>
                 </motion.div>
               ))}
-
-              {/* Step dots */}
-              <div className="absolute bottom-0 flex items-center gap-2">
-                {steps.map((_, i) => (
-                  <div
-                    key={i}
-                    className={`h-[2px] transition-all duration-300 rounded-full ${activeStep === i ? 'w-6 bg-accent' : 'w-2 bg-border'}`}
-                  />
+            </div>
+            <div className="mt-4 pt-3 border-t border-border">
+              <div className="text-xs font-mono text-text-muted mb-1">Confluence</div>
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map((n) => (
+                  <div key={n} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${n <= 4 ? 'bg-accent' : 'bg-border'}`} />
                 ))}
               </div>
             </div>
-
-            {/* Right: product UI that highlights active row */}
-            <div className="hidden lg:block bg-bg-card border border-border rounded-xl p-5 shadow-2xl shadow-black/40">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  <span className="text-xs font-mono text-text-muted">AAPL — Live Analysis</span>
-                </div>
-                <span className="text-xs font-mono text-text-muted">Score 7.2/10</span>
-              </div>
-              <div className="space-y-1">
-                {agentRows.map((row) => (
-                  <motion.div
-                    key={row.key}
-                    animate={steps[activeStep]?.highlight === row.key
-                      ? { backgroundColor: 'rgba(16,185,129,0.06)', x: 2 }
-                      : { backgroundColor: 'rgba(0,0,0,0)', x: 0 }
-                    }
-                    transition={{ duration: 0.3, ease: 'easeOut' }}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg border border-transparent"
-                    style={steps[activeStep]?.highlight === row.key ? { borderColor: 'rgba(16,185,129,0.15)' } : {}}
-                  >
-                    <span className="text-xs text-text-secondary">{row.label}</span>
-                    <span className={`text-xs font-mono font-semibold ${steps[activeStep]?.highlight === row.key ? row.color : 'text-text-muted'}`}>
-                      {row.value}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-              <div className="mt-4 pt-3 border-t border-border">
-                <div className="text-xs font-mono text-text-muted mb-1">Confluence</div>
-                <div className="flex gap-1">
-                  {[1,2,3,4,5].map((n) => (
-                    <div key={n} className={`h-1 flex-1 rounded-full ${n <= 4 ? 'bg-accent' : 'bg-border'}`} />
-                  ))}
-                </div>
-              </div>
-            </div>
-
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -386,7 +381,6 @@ function ScrollFeatureSection() {
 
 export default function Landing() {
   const heroRef = useRef<HTMLDivElement>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
   const stepsRef = useRef<HTMLDivElement>(null)
   const lineRef = useRef<HTMLDivElement>(null)
 
@@ -396,33 +390,6 @@ export default function Landing() {
     offset: ['start start', 'end start'],
   })
   const previewY = useTransform(heroScroll, [0, 1], [0, 80])
-
-  /* GSAP: horizontal line grows between steps */
-  useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return
-
-    const ctx = gsap.context(() => {
-      if (lineRef.current) {
-        gsap.fromTo(
-          lineRef.current,
-          { scaleX: 0 },
-          {
-            scaleX: 1,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: stepsRef.current,
-              start: 'top 80%',
-              end: 'bottom 60%',
-              scrub: 0.5,
-            },
-          }
-        )
-      }
-    })
-
-    return () => ctx.revert()
-  }, [])
 
   /* Smooth scroll for anchor links */
   useEffect(() => {
@@ -510,7 +477,7 @@ export default function Landing() {
           </motion.div>
 
           {/* Product preview - real UI snippet, not fake orbs */}
-          <div className="hidden lg:block" ref={previewRef}>
+          <div className="hidden lg:block">
             <motion.div
               initial={{ opacity: 0, y: 40, rotateX: 4 }}
               animate={{ opacity: 1, y: 0, rotateX: 0 }}
@@ -565,7 +532,7 @@ export default function Landing() {
       <StatsStrip />
 
       {/* Features - asymmetric bento, NOT 3 equal cards */}
-      <section id="features" className="px-6 md:px-12 py-24">
+      <section id="features" className="px-6 md:px-12 py-16">
         <div className="max-w-7xl mx-auto" ref={featuresRef}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Large feature - spans full width on first row */}

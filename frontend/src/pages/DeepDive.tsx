@@ -232,15 +232,17 @@ export default function DeepDive() {
   }
 
   // Auto-research if ticker param in URL (e.g., from MarketScanner click)
+  const lastAutoTicker = useRef('')
   useEffect(() => {
     const paramTicker = searchParams.get('ticker')
-    if (paramTicker) {
+    if (paramTicker && paramTicker.toUpperCase() !== lastAutoTicker.current) {
       const t = paramTicker.toUpperCase()
+      lastAutoTicker.current = t
       setTicker(t)
       runResearch(t)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

@@ -110,14 +110,14 @@ export default function Watchlist() {
         <Star className="w-4 h-4 text-gold" />
         <span className="text-sm font-semibold text-text-primary">Watchlist</span>
       </div>
-      <form onSubmit={handleAdd} className="flex gap-2 mb-3">
+      <form onSubmit={handleAdd} className="flex items-center gap-2 mb-3">
         <input
           value={newTicker}
           onChange={e => setNewTicker(e.target.value.toUpperCase())}
           placeholder="Add ticker (BTC, AAPL...)"
-          className="flex-1 px-3 py-2 bg-bg-elevated border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 transition-all"
+          className="min-w-0 flex-1 px-3 py-2 bg-bg-elevated border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 transition-all"
         />
-        <button type="submit" className="px-3 py-2 bg-accent/10 border border-accent/20 text-accent rounded-lg hover:bg-accent/20 transition-all cursor-pointer">
+        <button type="submit" className="shrink-0 w-9 h-9 flex items-center justify-center bg-accent/10 border border-accent/20 text-accent rounded-lg hover:bg-accent/20 transition-all cursor-pointer">
           <Plus className="w-4 h-4" />
         </button>
       </form>
@@ -136,14 +136,14 @@ export default function Watchlist() {
       </div>
 
       {/* Add form */}
-      <form onSubmit={handleAdd} className="flex gap-2 px-4 py-3 border-b border-border">
+      <form onSubmit={handleAdd} className="flex items-center gap-2 px-4 py-3 border-b border-border">
         <input
           value={newTicker}
           onChange={e => setNewTicker(e.target.value.toUpperCase())}
           placeholder="Add ticker (BTC, AAPL...)"
-          className="flex-1 px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 transition-all"
+          className="min-w-0 flex-1 px-3 py-1.5 bg-bg-elevated border border-border rounded-lg text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/40 transition-all"
         />
-        <button type="submit" className="px-2.5 py-1.5 bg-accent/10 border border-accent/20 text-accent rounded-lg hover:bg-accent/20 transition-all cursor-pointer text-xs">
+        <button type="submit" className="shrink-0 w-7 h-7 flex items-center justify-center bg-accent/10 border border-accent/20 text-accent rounded-lg hover:bg-accent/20 transition-all cursor-pointer">
           <Plus className="w-3.5 h-3.5" />
         </button>
       </form>

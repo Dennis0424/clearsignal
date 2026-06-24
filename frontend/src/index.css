@@ -53,6 +53,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Subtle noise grain overlay — fixed, pointer-events-none, GPU composited */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
 #root {
   min-height: 100dvh;
   display: flex;
@@ -64,11 +76,21 @@ body {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card-hover:hover {
   border-color: var(--color-border-light);
   background: var(--color-bg-elevated);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Interactive button press feedback */
+button:active:not(:disabled),
+a[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
 }
 
 /* Glow effects - toned down */
@@ -90,14 +112,21 @@ body {
 
 /* Shimmer animation for loading */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% { background-position: -400% 0; }
+  100% { background-position: 400% 0; }
 }
 
 .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.02) 0%,
+    rgba(255,255,255,0.02) 25%,
+    rgba(255,255,255,0.065) 50%,
+    rgba(255,255,255,0.02) 75%,
+    rgba(255,255,255,0.02) 100%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  border-radius: 6px;
 }
 
 /* Scroll reveal */

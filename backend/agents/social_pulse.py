@@ -43,11 +43,13 @@ def get_news_headlines(ticker: str) -> list[dict]:
     news = stock.news or []
     headlines = []
     for item in news[:8]:
-        headlines.append({
-            "title": item.get("title", ""),
-            "publisher": item.get("publisher", ""),
-            "link": item.get("link", ""),
-        })
+        # yfinance v0.2.50+ nests data under item['content']
+        content = item.get("content", item)
+        title = content.get("title", "")
+        publisher = (content.get("provider") or {}).get("displayName", content.get("publisher", ""))
+        link = (content.get("canonicalUrl") or {}).get("url", content.get("link", ""))
+        if title:
+            headlines.append({"title": title, "publisher": publisher, "link": link})
     return headlines
 
 
