@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { Microscope, Wallet, BookOpen } from 'lucide-react'
+import { Microscope, Wallet, BookOpen, ChartLine } from 'lucide-react'
 import MarketStatus from './MarketStatus'
 import SignalMark from './SignalMark'
 
@@ -8,6 +8,7 @@ const links = [
   { to: '/research', label: 'Research', icon: Microscope },
   { to: '/portfolio', label: 'Portfolio', icon: Wallet },
   { to: '/decisions', label: 'Decisions', icon: BookOpen },
+  { to: '/backtest', label: 'Backtest', icon: ChartLine },
 ]
 
 export default function Navbar() {

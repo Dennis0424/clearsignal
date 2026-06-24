@@ -7,6 +7,7 @@ import Landing from './pages/Landing'
 import DeepDive from './pages/DeepDive'
 import Portfolio from './pages/Portfolio'
 import Decisions from './pages/Decisions'
+import Backtest from './pages/Backtest'
 
 const pageVariants = {
   initial: { opacity: 0, y: 10 },
@@ -43,6 +44,7 @@ function Layout() {
             <Route path="/research" element={<AnimatedPage><DeepDive /></AnimatedPage>} />
             <Route path="/portfolio" element={<AnimatedPage><Portfolio /></AnimatedPage>} />
             <Route path="/decisions" element={<AnimatedPage><Decisions /></AnimatedPage>} />
+            <Route path="/backtest" element={<AnimatedPage><Backtest /></AnimatedPage>} />
           </Routes>
         </AnimatePresence>
       </main>
