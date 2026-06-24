@@ -1,0 +1,17 @@
+[
+  { "ticker": "NVDA",  "asset_class": "stock",  "price": 199.48,   "change_pct": -0.28, "sparkline": [204.65, 210.69, 208.65, 200.04, 199.48] },
+  { "ticker": "AAPL",  "asset_class": "stock",  "price": 294.60,   "change_pct":  0.10, "sparkline": [295.95, 298.01, 297.01, 294.30, 294.60] },
+  { "ticker": "MSFT",  "asset_class": "stock",  "price": 373.40,   "change_pct": -0.14, "sparkline": [378.91, 379.40, 367.34, 373.94, 373.40] },
+  { "ticker": "TSLA",  "asset_class": "stock",  "price": 381.33,   "change_pct": -0.07, "sparkline": [396.38, 400.49, 405.05, 381.61, 381.33] },
+  { "ticker": "AMZN",  "asset_class": "stock",  "price": 237.49,   "change_pct":  1.44, "sparkline": [237.50, 244.39, 232.79, 234.11, 237.49] },
+  { "ticker": "META",  "asset_class": "stock",  "price": 561.03,   "change_pct": -0.21, "sparkline": [567.58, 577.22, 563.85, 562.20, 561.03] },
+  { "ticker": "GOOGL", "asset_class": "stock",  "price": 350.03,   "change_pct":  1.13, "sparkline": [363.79, 368.03, 349.68, 346.13, 350.03] },
+  { "ticker": "AMD",   "asset_class": "stock",  "price": 519.35,   "change_pct": -0.10, "sparkline": [512.48, 537.37, 551.63, 519.85, 519.35] },
+  { "ticker": "PLTR",  "asset_class": "stock",  "price": 116.71,   "change_pct":  0.01, "sparkline": [130.63, 128.47, 119.50, 116.70, 116.71] },
+  { "ticker": "ARM",   "asset_class": "stock",  "price": 352.44,   "change_pct": -3.81, "sparkline": [418.88, 439.46, 407.72, 366.39, 352.44] },
+  { "ticker": "BTC",   "asset_class": "crypto", "price": 61093.99, "change_pct": -2.51, "sparkline": [64239.68, 63237.54, 63952.11, 62668.02, 61093.99] },
+  { "ticker": "ETH",   "asset_class": "crypto", "price": 1641.77,  "change_pct": -1.42, "sparkline": [1739.30, 1704.58, 1726.51, 1665.44, 1641.77] },
+  { "ticker": "SOL",   "asset_class": "crypto", "price": 68.81,    "change_pct": -1.20, "sparkline": [73.17, 72.42, 71.91, 69.64, 68.81] },
+  { "ticker": "BNB",   "asset_class": "crypto", "price": 569.13,   "change_pct": -1.47, "sparkline": [587.61, 583.75, 589.92, 577.60, 569.13] },
+  { "ticker": "XRP",   "asset_class": "crypto", "price": 1.08,     "change_pct": -3.03, "sparkline": [1.15, 1.12, 1.13, 1.11, 1.08] }
+]
