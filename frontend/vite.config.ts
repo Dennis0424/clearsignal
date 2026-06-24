@@ -31,6 +31,7 @@ export default defineConfig({
       '/whatif': 'http://localhost:8000',
       '/correlation': 'http://localhost:8000',
       '/scanner': 'http://localhost:8000',
+      '^/backtest\\?': { target: 'http://localhost:8000', rewrite: (p) => p },
     },
   },
 })
