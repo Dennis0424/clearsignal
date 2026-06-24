@@ -876,7 +876,7 @@ Expected: all tests pass (including the 5 new backtest tests)
 
 ```bash
 cd D:/clearsignal
-git push "https://Dennis0424:[REDACTED]@github.com/Dennis0424/clearsignal.git" master
+git push origin master
 ```
 
 Expected: `master -> master`

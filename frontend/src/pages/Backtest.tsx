@@ -18,7 +18,7 @@ interface BacktestResult {
   equity_curve: EquityPoint[]; signals: Signal[]; stats: Stats; trades: Trade[]
 }
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+const API = import.meta.env.VITE_API_URL ?? ''
 
 function StatCard({ label, value, sub, positive }: { label: string; value: string; sub?: string; positive?: boolean }) {
   const color = positive === undefined ? 'text-text-primary' : positive ? 'text-bullish' : 'text-bearish'
@@ -60,7 +60,8 @@ export default function Backtest() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`${API}/backtest?ticker=${ticker.toUpperCase()}&period=${period}`)
+      const t = ticker.trim().toUpperCase()
+      const res = await fetch(`${API}/backtest?ticker=${encodeURIComponent(t)}&period=${encodeURIComponent(period)}`)
       if (!res.ok) throw new Error(`Server error ${res.status}`)
       const data: BacktestResult = await res.json()
       setResult(data)
@@ -86,8 +87,8 @@ export default function Backtest() {
       <div className="glass-card p-4 flex flex-wrap items-center gap-3">
         <input
           value={ticker}
-          onChange={e => setTicker(e.target.value.toUpperCase())}
-          onKeyDown={e => e.key === 'Enter' && runBacktest()}
+          onChange={e => setTicker(e.target.value.toUpperCase().trim())}
+          onKeyDown={e => e.key === 'Enter' && !loading && runBacktest()}
           placeholder="Ticker (e.g. NVDA)"
           className="min-w-0 flex-1 max-w-xs bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50"
         />
@@ -140,7 +141,7 @@ export default function Backtest() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#52525b' }} tickLine={false} axisLine={false}
-                interval={Math.floor(result.equity_curve.length / 6)} />
+                interval={Math.max(1, Math.floor(result.equity_curve.length / 6))} />
               <YAxis tick={{ fontSize: 10, fill: '#52525b' }} tickLine={false} axisLine={false}
                 tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
               <Tooltip content={<CustomTooltip />} />
@@ -161,16 +162,18 @@ export default function Backtest() {
         <div className="glass-card p-4">
           <h2 className="text-sm font-semibold text-text-primary mb-4">Price Chart + Signals</h2>
           <ResponsiveContainer width="100%" height={240}>
-            <ComposedChart data={result.equity_curve.map((pt, i) => ({
-              ...pt,
-              price: result.equity_curve[i].buy_hold / (result.equity_curve[0].buy_hold / 100),
+            <ComposedChart data={result.equity_curve.map(pt => ({
+              date: pt.date,
+              priceNorm: result.equity_curve[0].buy_hold > 0
+                ? Math.round((pt.buy_hold / result.equity_curve[0].buy_hold) * 1000) / 10
+                : 0,
             }))} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
               <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#52525b' }} tickLine={false} axisLine={false}
-                interval={Math.floor(result.equity_curve.length / 6)} />
+                interval={Math.max(1, Math.floor(result.equity_curve.length / 6))} />
               <YAxis tick={{ fontSize: 10, fill: '#52525b' }} tickLine={false} axisLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="buy_hold" name={`${result.ticker} Price`} stroke="#a1a1aa"
+              <Line type="monotone" dataKey="priceNorm" name={`${result.ticker} (indexed to 100)`} stroke="#a1a1aa"
                 strokeWidth={1.5} dot={false} isAnimationActive={false} />
               {result.signals.filter(s => s.action === 'enter').map(s => (
                 <ReferenceLine key={`buy-${s.date}`} x={s.date} stroke="#10b981" strokeDasharray="3 3"
