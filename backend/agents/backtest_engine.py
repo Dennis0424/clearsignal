@@ -53,15 +53,15 @@ def compute_proxies(df: pd.DataFrame) -> pd.DataFrame:
     df["volume_ratio"] = (volume / vol_avg.replace(0, np.nan)) * 50
 
     # SMA200 deviation %
-    sma200 = close.rolling(200, min_periods=1).mean()
+    sma200 = close.rolling(200, min_periods=1).mean().shift(1)
     df["sma_dev"] = ((close - sma200) / sma200) * 100
 
     # 5-day momentum %
     df["momentum_5d"] = (close / close.shift(MOMENTUM_DAYS) - 1) * 100
 
     # Bollinger position (20d, 2 std)
-    sma20 = close.rolling(BB_PERIOD, min_periods=BB_PERIOD).mean()
-    std20 = close.rolling(BB_PERIOD, min_periods=BB_PERIOD).std()
+    sma20 = close.rolling(BB_PERIOD, min_periods=BB_PERIOD).mean().shift(1)
+    std20 = close.rolling(BB_PERIOD, min_periods=BB_PERIOD).std().shift(1)
     lower = sma20 - 2 * std20
     upper = sma20 + 2 * std20
     band_width = (upper - lower).replace(0, np.nan)

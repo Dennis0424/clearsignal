@@ -6,6 +6,7 @@ from agents.backtest_engine import fetch_ohlcv, compute_proxies, run_backtest
 
 def make_ohlcv(n=300) -> pd.DataFrame:
     """Synthetic OHLCV: steady uptrend with some noise."""
+    np.random.seed(42)
     dates = pd.date_range("2023-01-01", periods=n, freq="B")
     close = 100 + np.cumsum(np.random.randn(n) * 0.5 + 0.1)
     close = np.maximum(close, 1.0)
@@ -37,6 +38,16 @@ def test_compute_proxies_no_lookahead():
     pd.testing.assert_series_equal(
         result["rsi"].iloc[:201],
         result2["rsi"].iloc[:201],
+        check_names=False,
+    )
+    pd.testing.assert_series_equal(
+        result["sma_dev"].iloc[:201],
+        result2["sma_dev"].iloc[:201],
+        check_names=False,
+    )
+    pd.testing.assert_series_equal(
+        result["bb_position"].iloc[:201],
+        result2["bb_position"].iloc[:201],
         check_names=False,
     )
 
